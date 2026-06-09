@@ -57,10 +57,10 @@
     }
   </script>
 </head>
-<body class="bg-slate-950 text-slate-800 antialiased min-h-screen flex justify-center items-stretch md:py-8">
+<body class="bg-slate-950 text-slate-800 antialiased h-[100dvh] w-full flex justify-center items-center overflow-hidden md:p-4">
 
-  <!-- Mobile Frame Emulator (Centering for Desktop, Fullscreen on Mobile Phones) -->
-  <div class="w-full max-w-md min-h-screen md:min-h-[850px] md:max-h-[900px] bg-slate-50 flex flex-col justify-between relative shadow-2xl md:border md:border-slate-800 md:rounded-3xl overflow-hidden">
+  <!-- Mobile Frame Emulator (Fits perfectly on mobile, centers like a phone on desktop) -->
+  <div class="w-full h-full max-w-md bg-slate-50 flex flex-col relative shadow-2xl md:border md:border-slate-800 md:rounded-[2rem] overflow-hidden">
     
     <!-- SYSTEM BANNER NOTIFICATION -->
     <div id="system-notification" class="hidden p-3 text-xs font-semibold text-center absolute top-0 left-0 right-0 z-50 shadow-md transition-all duration-300 flex items-center justify-center space-x-2">
@@ -236,17 +236,21 @@
       );
     }
 
-    // Exponential Backoff API Wrapper
+    // Robust Exponential Backoff API Wrapper (Catches Non-200 responses)
     async function fetchWithRetry(url, options, maxRetries = 5) {
       for (let i = 0; i < maxRetries; i++) {
         try {
           const response = await fetch(url, options);
-          if (response.ok) return await response.json();
+          if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errText}`);
+          }
+          return await response.json();
         } catch (err) {
           if (i === maxRetries - 1) throw err;
+          const delay = Math.pow(2, i) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
-        const delay = Math.pow(2, i) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
 
@@ -305,7 +309,7 @@
       const payload = {
         contents: [{ parts: [{ text: userPrompt }] }],
         systemInstruction: { parts: [{ text: systemPrompt }] },
-        tools: [{ google_search: {} }],
+        // Removing tools object from strict JSON generation to prevent HTTP 400 schema conflicts
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: responseSchema,
@@ -327,22 +331,21 @@
         if (!parsedText) throw new Error("Null response from core AI processing pipeline.");
 
         const generatedDrug = JSON.parse(parsedText);
-        const attributions = resultData.candidates?.[0]?.groundingMetadata?.groundingAttributions || [];
-        const references = attributions.map(attr => ({
-          title: attr.web?.title || "Clinical Advisory",
-          uri: attr.web?.uri || ""
-        })).filter(ref => ref.uri !== "");
-
         const drugWithMeta = {
           ...generatedDrug,
           id: generatedDrug.genericName.toLowerCase().replace(/\s+/g, '-'),
           createdAt: new Date().toISOString(),
-          references: references.length > 0 ? references : [{ title: "Primary Monograph & Safety Protocols", uri: "" }]
+          references: [{ title: "Primary Monograph & Safety Protocols", uri: "" }]
         };
 
+        // Try to save to Firestore, but catch exceptions so the UI doesn't break if permissions are restricted
         if (firebaseActive && state.user) {
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'drugs', drugWithMeta.id);
-          await setDoc(docRef, drugWithMeta);
+          try {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'drugs', drugWithMeta.id);
+            await setDoc(docRef, drugWithMeta);
+          } catch (fsErr) {
+            console.error("Cloud Sync Warning - Saved to Local Engine Only:", fsErr);
+          }
         }
 
         const updatedLocal = [drugWithMeta, ...state.clinicalDrugs.filter(d => d.id !== drugWithMeta.id)];
@@ -352,8 +355,9 @@
         state.searchQuery = '';
         showBanner(`${drugWithMeta.genericName.toUpperCase()} synthesized successfully.`, "success");
       } catch (err) {
-        console.error(err);
-        state.apiError = "Inquiry failed. Confirm chemical nomenclature or line connection.";
+        console.error("Synthesis Exception:", err);
+        // Display a more helpful API error
+        state.apiError = "Inquiry failed. " + (err.message || "Confirm connection or query format.");
       } finally {
         state.apiLoading = false;
         renderApp();
@@ -377,7 +381,7 @@
       };
 
       try {
-        const response = await fetch(
+        const response = await fetchWithRetry(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
           {
             method: 'POST',
@@ -385,10 +389,10 @@
             body: JSON.stringify(payload)
           }
         );
-        const data = await response.json();
-        state.assistantResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to synthesize clinical criteria.";
+        state.assistantResponse = response.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to synthesize clinical criteria.";
       } catch (e) {
-        state.assistantResponse = "Server pipeline unreachable. Review local link.";
+        console.error("Assistant Exception:", e);
+        state.assistantResponse = "Server pipeline unreachable. " + (e.message || "Review local link.");
       } finally {
         state.assistantLoading = false;
         renderApp();
@@ -412,8 +416,8 @@
       if (!state.user) {
         bottomNav.classList.add('hidden');
         container.innerHTML = `
-          <div class="flex-grow flex flex-col justify-between p-6 bg-slate-950 text-white min-h-screen">
-            <div class="text-center mt-12">
+          <div class="flex-grow flex flex-col justify-between p-6 bg-slate-950 text-white h-full overflow-y-auto">
+            <div class="text-center mt-12 flex-shrink-0">
               <div class="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-500/20">
                 <svg class="w-8 h-8 text-slate-950" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
               </div>
@@ -421,7 +425,7 @@
               <p class="text-slate-500 text-[10px] tracking-wider uppercase font-semibold mt-1">Secure Clinical Authentication</p>
             </div>
 
-            <form id="auth-form" class="space-y-4 my-auto max-w-xs w-full mx-auto">
+            <form id="auth-form" class="space-y-4 my-auto max-w-xs w-full mx-auto py-8">
               <div>
                 <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Email Address</label>
                 <input
@@ -472,7 +476,7 @@
               </div>
             </form>
 
-            <div class="text-center text-[8px] text-slate-600 tracking-widest pb-4">
+            <div class="text-center flex-shrink-0 text-[8px] text-slate-600 tracking-widest pb-4">
               SECURED LOGISTICS COMPLIANCE HUB — PRIVACY SHIELD ENFORCED
             </div>
           </div>
@@ -516,8 +520,8 @@
       if (state.isLocked) {
         bottomNav.classList.add('hidden');
         container.innerHTML = `
-          <div class="flex-grow flex flex-col justify-between p-6 bg-slate-950 text-white min-h-screen">
-            <div class="text-center mt-10">
+          <div class="flex-grow flex flex-col justify-between p-6 bg-slate-950 text-white h-full overflow-y-auto">
+            <div class="text-center mt-10 flex-shrink-0">
               <div class="w-10 h-10 bg-teal-500/10 rounded-full flex items-center justify-center mx-auto mb-2.5 border border-teal-500/20">
                 <svg class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
               </div>
@@ -525,7 +529,7 @@
               <p class="text-[9px] text-slate-500 uppercase mt-1 tracking-wider">${state.user.email}</p>
             </div>
 
-            <div class="text-center">
+            <div class="text-center my-auto py-8">
               <span class="text-[10px] text-slate-400 uppercase tracking-widest block mb-4 font-semibold">
                 ${state.setupStep === 'setup-1' ? 'Create 4-Digit PIN' : ''}
                 ${state.setupStep === 'setup-2' ? 'Confirm 4-Digit PIN' : ''}
@@ -549,7 +553,7 @@
             </div>
 
             <!-- PIN Pad Keypad Component (Sterile iOS EHR design) -->
-            <div class="mb-6">
+            <div class="mb-6 flex-shrink-0">
               <div class="grid grid-cols-3 gap-y-3 gap-x-6 max-w-xs mx-auto">
                 ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => `
                   <button onclick="window.pressPIN('${num}')" class="w-14 h-14 rounded-full bg-slate-900 border border-slate-800/80 hover:bg-slate-850 active:bg-slate-800 transition-colors flex items-center justify-center text-xl font-medium text-slate-200 mx-auto">
@@ -582,10 +586,10 @@
         } else {
           container.innerHTML = `
             <!-- Independent Scroll Area -->
-            <div class="flex-grow flex flex-col overflow-hidden bg-slate-50">
+            <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
               
               <!-- Static non-scrolling search header -->
-              <div class="bg-slate-950 text-white p-5 border-b border-slate-900">
+              <div class="bg-slate-950 text-white p-5 border-b border-slate-900 flex-shrink-0">
                 <div class="flex items-center space-x-2 mb-2">
                   <svg class="w-4 h-4 text-teal-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
                   <h2 class="text-xs font-bold uppercase tracking-widest text-slate-100">GuideNurse Search</h2>
@@ -614,7 +618,7 @@
               </div>
 
               <!-- Content Scroll container -->
-              <div class="flex-grow app-scroll-container p-4 pb-20 space-y-4">
+              <div class="flex-grow app-scroll-container p-4 space-y-4">
                 
                 ${state.apiLoading ? `
                   <!-- Pulsing Sterile Radar Animation Component -->
@@ -637,7 +641,7 @@
                 ` : ''}
 
                 <!-- Database Monograph List -->
-                <div class="space-y-2">
+                <div class="space-y-2 pb-6">
                   <div class="flex items-center justify-between text-slate-500 px-1 text-[9px] font-bold tracking-wider uppercase">
                     <span>Active Institutional Formulary</span>
                     <span>${filteredDrugs.length} Monographs</span>
@@ -691,8 +695,8 @@
           renderDrugDetail(state.selectedDrug, container);
         } else {
           container.innerHTML = `
-            <div class="flex-grow flex flex-col overflow-hidden bg-slate-50">
-              <div class="bg-white p-4 border-b border-slate-200">
+            <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
+              <div class="bg-white p-4 border-b border-slate-200 flex-shrink-0">
                 <h2 class="text-xs font-bold text-slate-950 uppercase tracking-widest">Master Index</h2>
                 <div class="relative mt-2.5">
                   <input
@@ -708,7 +712,7 @@
                 </div>
               </div>
 
-              <div class="flex-grow app-scroll-container p-4 pb-20 space-y-2">
+              <div class="flex-grow app-scroll-container p-4 pb-6 space-y-2">
                 ${filteredDrugs.map(drug => `
                   <div onclick="window.selectDrug('${drug.id}')" class="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 cursor-pointer active-feedback flex justify-between items-center">
                     <div class="flex items-center space-x-3">
@@ -745,9 +749,9 @@
       // Tab Panel: Calculations & Assistant Scenarios
       if (state.activeTab === 'tools') {
         container.innerHTML = `
-          <div class="flex-grow flex flex-col overflow-hidden bg-slate-50">
+          <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
             <!-- Navigation Sub-segment -->
-            <div class="bg-slate-950 p-2 border-b border-slate-900">
+            <div class="bg-slate-950 p-2 border-b border-slate-900 flex-shrink-0">
               <div class="bg-slate-900 p-0.5 rounded-lg flex text-white">
                 <button onclick="window.setCalcType('drip')" class="flex-grow py-2 text-[9px] uppercase font-bold tracking-widest rounded transition-all ${state.calcType === 'drip' ? 'bg-teal-600 text-slate-950' : 'text-slate-400 hover:text-slate-200'}">Drip Rate</button>
                 <button onclick="window.setCalcType('dose')" class="flex-grow py-2 text-[9px] uppercase font-bold tracking-widest rounded transition-all ${state.calcType === 'dose' ? 'bg-teal-600 text-slate-950' : 'text-slate-400 hover:text-slate-200'}">Infusion Dose</button>
@@ -756,7 +760,7 @@
             </div>
 
             <!-- Calculators Panel -->
-            <div class="flex-grow app-scroll-container p-4 pb-24">
+            <div class="flex-grow app-scroll-container p-4 pb-6">
               ${state.calcType !== 'assistant' ? `
                 <div class="bg-white p-5 rounded-xl border border-slate-200/80 space-y-4">
                   <h3 class="text-xs font-bold text-slate-950 uppercase tracking-widest">
@@ -905,7 +909,7 @@
       // Tab Panel: Settings
       if (state.activeTab === 'settings') {
         container.innerHTML = `
-          <div class="flex-grow flex flex-col overflow-hidden bg-slate-50 p-4 space-y-4">
+          <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50 p-4 space-y-4">
             <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
               <h3 class="text-xs font-bold text-slate-950 uppercase tracking-widest">Device Settings</h3>
               <div class="space-y-3">
@@ -949,7 +953,7 @@
       }
 
       parentContainer.innerHTML = `
-        <div class="flex-grow flex flex-col overflow-hidden bg-slate-50">
+        <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
           
           <!-- Stationary Detail Header -->
           <div class="p-5 bg-slate-950 text-white flex justify-between items-start flex-shrink-0 border-b border-slate-900">
@@ -991,7 +995,7 @@
           </div>
 
           <!-- Independent scrolling content area -->
-          <div class="flex-grow app-scroll-container p-4 pb-24 space-y-4">
+          <div class="flex-grow app-scroll-container p-4 pb-6 space-y-4">
             
             ${drug.blackBoxWarning && drug.blackBoxWarning.toLowerCase() !== 'none' ? `
               <div class="bg-red-50 border border-red-200 p-3.5 rounded-xl flex items-start space-x-2.5">
