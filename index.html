@@ -104,6 +104,12 @@
       onSnapshot 
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    // =========================================================================
+    // ⚠️ ACTION REQUIRED: PASTE YOUR GOOGLE GEMINI API KEY HERE
+    // Get it free at: https://aistudio.google.com/app/apikey
+    // =========================================================================
+    const GEMINI_API_KEY = "AQ.Ab8RN6KYkMO9cF14KDgdO6UEgqeOexA8KzhWNrHfGLWSBWRJDw"; 
+
     // Your confirmed web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBHAPAy9Z4kQrWod7Pa0MMrrpppeMpiqZA",
@@ -255,7 +261,7 @@
       renderApp();
 
       // Ensure key injection functions exactly as designed in this environment
-      const apiKey = "AQ.Ab8RN6LzTWyaao4RKAOHJvAPQsygVF_WQ9ThvVIleJ-9nHywmQ"; 
+      const apiKey = ""; 
       const systemPrompt = `You are an authoritative clinical pharmacology expert. Design comprehensive medical monographs for Registered Nurses. Focus exclusively on active clinical practice parameters, patient safety protocols, IV infusion guidelines, rate restrictions, lab monitoring schedules, and therapeutic drug-drug interactions. Omit academic testing references, mnemonic shortcuts, or generic study tips. Format output exactly in standard scientific schema JSON.`;
       const userPrompt = `Synthesize clinical monograph and critical safety criteria for: "${queryName}". Access recent medical advisories and consensus literature.`;
 
@@ -364,7 +370,7 @@
       state.assistantResponse = '';
       renderApp();
 
-      const apiKey = "AQ.Ab8RN6LzTWyaao4RKAOHJvAPQsygVF_WQ9ThvVIleJ-9nHywmQ";
+      const apiKey = "";
       const systemPrompt = `You are an expert Clinical Pharmacologist and Nursing Educator. Analyze the scenario using standard clinical, evidence-based guidelines. Respond in a brief, sterile, and professional clinical layout. Avoid informal or casual terminology, and focus entirely on quantitative safe parameters and immediate clinical workflows.`;
 
       const payload = {
