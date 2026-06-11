@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>GuideNurse</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts for Medical Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -59,20 +57,15 @@
 </head>
 <body class="bg-slate-950 text-slate-800 antialiased h-[100dvh] w-full flex justify-center items-center overflow-hidden md:p-4">
 
-  <!-- Mobile Frame Emulator (Fits perfectly on mobile, centers like a phone on desktop) -->
   <div class="w-full h-full max-w-md bg-slate-50 flex flex-col relative shadow-2xl md:border md:border-slate-800 md:rounded-[2rem] overflow-hidden">
     
-    <!-- SYSTEM BANNER NOTIFICATION -->
     <div id="system-notification" class="hidden p-3 text-xs font-semibold text-center absolute top-0 left-0 right-0 z-50 shadow-md transition-all duration-300 flex items-center justify-center space-x-2">
       <span id="notif-text">System Status Update</span>
     </div>
 
-    <!-- MAIN VIEW CONTAINER (Dynamic Subviews Injected Here) -->
     <div id="app-viewport" class="flex flex-col h-full flex-grow overflow-hidden">
-      <!-- Injected by Controller -->
-    </div>
+      </div>
 
-    <!-- BOTTOM CLINICAL NAVIGATION DRAWER (Only visible when logged in and unlocked) -->
     <nav id="bottom-navigation" class="hidden flex-shrink-0 bg-slate-950 text-white flex justify-around py-2 px-1 border-t border-slate-900 shadow-xl z-30 pb-safe">
       <button onclick="window.switchTab('search')" id="nav-search" class="flex flex-col items-center flex-1 py-1.5 text-teal-400 font-bold transition-all focus:outline-none">
         <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -94,7 +87,6 @@
 
   </div>
 
-  <!-- FIREBASE AND SYSTEM LOGIC MODULE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { 
@@ -112,10 +104,11 @@
       onSnapshot 
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Dynamic config parsing + secure fallbacks
+    // Your confirmed web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBHAPAy9Z4kQrWod7Pa0MMrrpppeMpiqZA",
       authDomain: "guidenurse-46052.firebaseapp.com",
+      databaseURL: "https://guidenurse-46052-default-rtdb.firebaseio.com",
       projectId: "guidenurse-46052",
       storageBucket: "guidenurse-46052.firebasestorage.app",
       messagingSenderId: "702106825259",
@@ -206,7 +199,7 @@
       });
     }
 
-    // Firestore Integration & Data Synchronization (Rule 1 Strict Pathing)
+    // Firestore Integration & Data Synchronization
     function syncFirestoreFormulary() {
       if (!firebaseActive || !state.user) return;
       const drugsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'drugs');
@@ -231,7 +224,7 @@
         },
         (error) => {
           console.error("Firestore sync subscription failure:", error);
-          showBanner("Real-time cloud database disconnected. Using local sandbox.", "info");
+          showBanner("Cloud sync failed. Check Firestore rules.", "error");
         }
       );
     }
@@ -261,6 +254,7 @@
       state.apiError = null;
       renderApp();
 
+      // Ensure key injection functions exactly as designed in this environment
       const apiKey = ""; 
       const systemPrompt = `You are an authoritative clinical pharmacology expert. Design comprehensive medical monographs for Registered Nurses. Focus exclusively on active clinical practice parameters, patient safety protocols, IV infusion guidelines, rate restrictions, lab monitoring schedules, and therapeutic drug-drug interactions. Omit academic testing references, mnemonic shortcuts, or generic study tips. Format output exactly in standard scientific schema JSON.`;
       const userPrompt = `Synthesize clinical monograph and critical safety criteria for: "${queryName}". Access recent medical advisories and consensus literature.`;
@@ -309,7 +303,6 @@
       const payload = {
         contents: [{ parts: [{ text: userPrompt }] }],
         systemInstruction: { parts: [{ text: systemPrompt }] },
-        // Removing tools object from strict JSON generation to prevent HTTP 400 schema conflicts
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: responseSchema,
@@ -338,13 +331,14 @@
           references: [{ title: "Primary Monograph & Safety Protocols", uri: "" }]
         };
 
-        // Try to save to Firestore, but catch exceptions so the UI doesn't break if permissions are restricted
+        // Saving to live Firestore 
         if (firebaseActive && state.user) {
           try {
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'drugs', drugWithMeta.id);
             await setDoc(docRef, drugWithMeta);
           } catch (fsErr) {
-            console.error("Cloud Sync Warning - Saved to Local Engine Only:", fsErr);
+            console.error("Cloud Sync Warning - Make sure Firestore Rules allow write access:", fsErr);
+            showBanner("Database Save Blocked: Check Firestore Rules", "error");
           }
         }
 
@@ -356,7 +350,6 @@
         showBanner(`${drugWithMeta.genericName.toUpperCase()} synthesized successfully.`, "success");
       } catch (err) {
         console.error("Synthesis Exception:", err);
-        // Display a more helpful API error
         state.apiError = "Inquiry failed. " + (err.message || "Confirm connection or query format.");
       } finally {
         state.apiLoading = false;
@@ -399,7 +392,7 @@
       }
     }
 
-    // Fluid Mobile Rendering Engine (Replaces raw inputs and infantile design with solid EHR elements)
+    // Fluid Mobile Rendering Engine 
     function renderApp() {
       const container = document.getElementById('app-viewport');
       const bottomNav = document.getElementById('bottom-navigation');
@@ -536,7 +529,6 @@
                 ${state.setupStep === 'enter' ? 'Enter 4-Digit PIN' : ''}
               </span>
 
-              <!-- Code Dots indicators -->
               <div class="flex justify-center space-x-5 mb-2">
                 ${[0, 1, 2, 3].map(idx => `
                   <div class="w-3.5 h-3.5 rounded-full border border-slate-700 transition-all duration-200 ${
@@ -552,7 +544,6 @@
               ` : ''}
             </div>
 
-            <!-- PIN Pad Keypad Component (Sterile iOS EHR design) -->
             <div class="mb-6 flex-shrink-0">
               <div class="grid grid-cols-3 gap-y-3 gap-x-6 max-w-xs mx-auto">
                 ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => `
@@ -585,10 +576,8 @@
           renderDrugDetail(state.selectedDrug, container);
         } else {
           container.innerHTML = `
-            <!-- Independent Scroll Area -->
             <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
               
-              <!-- Static non-scrolling search header -->
               <div class="bg-slate-950 text-white p-5 border-b border-slate-900 flex-shrink-0">
                 <div class="flex items-center space-x-2 mb-2">
                   <svg class="w-4 h-4 text-teal-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
@@ -617,11 +606,9 @@
                 </div>
               </div>
 
-              <!-- Content Scroll container -->
               <div class="flex-grow app-scroll-container p-4 space-y-4">
                 
                 ${state.apiLoading ? `
-                  <!-- Pulsing Sterile Radar Animation Component -->
                   <div class="flex flex-col items-center justify-center py-12 space-y-4 bg-white rounded-xl border border-slate-200">
                     <div class="relative w-16 h-16 flex items-center justify-center">
                       <div class="absolute w-16 h-16 border border-teal-500/20 rounded-full animate-spin [animation-duration:8s]"></div>
@@ -640,7 +627,6 @@
                   </div>
                 ` : ''}
 
-                <!-- Database Monograph List -->
                 <div class="space-y-2 pb-6">
                   <div class="flex items-center justify-between text-slate-500 px-1 text-[9px] font-bold tracking-wider uppercase">
                     <span>Active Institutional Formulary</span>
@@ -750,7 +736,6 @@
       if (state.activeTab === 'tools') {
         container.innerHTML = `
           <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
-            <!-- Navigation Sub-segment -->
             <div class="bg-slate-950 p-2 border-b border-slate-900 flex-shrink-0">
               <div class="bg-slate-900 p-0.5 rounded-lg flex text-white">
                 <button onclick="window.setCalcType('drip')" class="flex-grow py-2 text-[9px] uppercase font-bold tracking-widest rounded transition-all ${state.calcType === 'drip' ? 'bg-teal-600 text-slate-950' : 'text-slate-400 hover:text-slate-200'}">Drip Rate</button>
@@ -759,7 +744,6 @@
               </div>
             </div>
 
-            <!-- Calculators Panel -->
             <div class="flex-grow app-scroll-container p-4 pb-6">
               ${state.calcType !== 'assistant' ? `
                 <div class="bg-white p-5 rounded-xl border border-slate-200/80 space-y-4">
@@ -839,7 +823,6 @@
                   ` : ''}
                 </div>
               ` : `
-                <!-- AI Scenario Assistant -->
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 animate-fade-in">
                   <div>
                     <h3 class="text-xs font-bold text-slate-950 uppercase tracking-widest">Clinical Reference Inquiry</h3>
@@ -946,7 +929,7 @@
       }
     }
 
-    // Dynamic Monograph Drawer Detail Rendering (LIGHT BEDSIDE HIGHLIGHT SYSTEM)
+    // Dynamic Monograph Drawer Detail Rendering
     function renderDrugDetail(drug, parentContainer) {
       if (!window.drugTabState) {
         window.drugTabState = 'summary'; 
@@ -955,7 +938,6 @@
       parentContainer.innerHTML = `
         <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
           
-          <!-- Stationary Detail Header -->
           <div class="p-5 bg-slate-950 text-white flex justify-between items-start flex-shrink-0 border-b border-slate-900">
             <div>
               <div class="flex items-center space-x-2">
@@ -976,7 +958,6 @@
             </button>
           </div>
 
-          <!-- Tab Bar (Swipeable on narrow screens) -->
           <div class="flex-shrink-0 flex bg-slate-100 border-b border-slate-200 p-1 overflow-x-auto whitespace-nowrap scrollbar-none">
             ${[
               { id: 'summary', label: 'Summary' },
@@ -994,7 +975,6 @@
             `).join('')}
           </div>
 
-          <!-- Independent scrolling content area -->
           <div class="flex-grow app-scroll-container p-4 pb-6 space-y-4">
             
             ${drug.blackBoxWarning && drug.blackBoxWarning.toLowerCase() !== 'none' ? `
@@ -1007,7 +987,6 @@
               </div>
             ` : ''}
 
-            <!-- Tab: Summary -->
             ${window.drugTabState === 'summary' ? `
               <div class="space-y-4 animate-fade-in">
                 <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
@@ -1056,7 +1035,6 @@
               </div>
             ` : ''}
 
-            <!-- Tab: Admin & Compatibility -->
             ${window.drugTabState === 'admin' ? `
               <div class="space-y-3.5 animate-fade-in">
                 <div>
@@ -1092,7 +1070,6 @@
               </div>
             ` : ''}
 
-            <!-- Tab: Kinetics -->
             ${window.drugTabState === 'info' ? `
               <div class="space-y-3.5 animate-fade-in">
                 <div>
@@ -1114,7 +1091,6 @@
               </div>
             ` : ''}
 
-            <!-- Tab: Monitoring -->
             ${window.drugTabState === 'monitoring' ? `
               <div class="space-y-3.5 animate-fade-in">
                 <div>
@@ -1155,7 +1131,6 @@
               </div>
             ` : ''}
 
-            <!-- Tab: Contraindications -->
             ${window.drugTabState === 'interactions' ? `
               <div class="space-y-3.5 animate-fade-in">
                 <div>
@@ -1184,7 +1159,6 @@
               </div>
             ` : ''}
 
-            <!-- Tab: Clinical Evidence -->
             ${window.drugTabState === 'research' ? `
               <div class="space-y-3.5 animate-fade-in">
                 <div>
