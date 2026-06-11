@@ -67,7 +67,7 @@
       <!-- Injected by Controller -->
     </div>
 
-    <!-- BOTTOM NAVIGATION (Dynamic styling handled by JS) -->
+    <!-- BOTTOM NAVIGATION -->
     <nav id="bottom-navigation" class="hidden flex-shrink-0 bg-white border-t border-slate-200 flex justify-around pb-safe z-30 px-2 py-1 relative">
       <button onclick="window.switchTab('search')" id="nav-search" class="nav-btn flex flex-col items-center flex-1 pt-2 pb-1.5 transition-colors focus:outline-none text-slate-400">
         <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
@@ -102,7 +102,8 @@
       collection, 
       doc, 
       setDoc, 
-      onSnapshot 
+      onSnapshot,
+      deleteDoc 
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // Firebase Configuration
@@ -139,7 +140,7 @@
       passcodeError: '',
       setupStep: localStorage.getItem('rn_passcode') ? 'enter' : 'setup-1',
       tempPasscode: '',
-      groqApiKey: localStorage.getItem('rn_groq_key') || '', // Replaced hardcoded key with BYOK
+      groqApiKey: localStorage.getItem('rn_groq_key') || '',
       activeTab: 'search',
       selectedDrug: null,
       clinicalDrugs: JSON.parse(localStorage.getItem('rn_local_drugs') || '[]'),
@@ -415,6 +416,26 @@
         renderApp();
       }
     }
+
+    // Delete Drug Functionality
+    window.deleteDrug = async (drugId) => {
+      // Remove locally immediately for snappy UI
+      state.clinicalDrugs = state.clinicalDrugs.filter(d => d.id !== drugId);
+      localStorage.setItem('rn_local_drugs', JSON.stringify(state.clinicalDrugs));
+      renderApp();
+
+      // Remove from Firestore if connected
+      if (firebaseActive && state.user) {
+        try {
+          await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'drugs', drugId));
+        } catch (err) {
+          console.error("Failed to delete from cloud:", err);
+          showBanner("Removed locally, but cloud delete failed.", "error");
+          return;
+        }
+      }
+      showBanner("Drug removed from formulary.", "success");
+    };
 
     // Helper to update bottom nav colors safely
     function updateBottomNavUI() {
@@ -706,20 +727,39 @@
 
               <div class="flex-grow app-scroll-container p-4 pb-6 space-y-3">
                 ${filteredDrugs.map(drug => `
-                  <div onclick="window.selectDrug('${drug.id}')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all active-feedback flex justify-between items-center cursor-pointer">
-                    <div class="flex items-start space-x-3">
-                      <div class="mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${drug.highAlert ? 'bg-red-500' : 'bg-blue-500'}"></div>
-                      <div>
-                        <h3 class="font-bold text-slate-800 text-sm capitalize">${drug.genericName}</h3>
-                        <p class="text-[11px] font-semibold text-slate-500 mt-1">${drug.therapeuticClass}</p>
+                  <!-- Swipe-to-Delete Container -->
+                  <div class="relative rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-red-500 group">
+                    <!-- Background Delete Button -->
+                    <button onclick="window.deleteDrug('${drug.id}')" class="absolute inset-y-0 right-0 w-24 flex flex-col items-center justify-center text-white focus:outline-none hover:bg-red-600 transition-colors">
+                      <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      <span class="text-[10px] font-bold tracking-wider uppercase">Delete</span>
+                    </button>
+                    
+                    <!-- Swipeable Foreground Card -->
+                    <div class="overflow-x-auto snap-x snap-mandatory scrollbar-none flex w-full h-full relative" style="-webkit-overflow-scrolling: touch;">
+                      <div class="snap-start w-full flex-shrink-0 bg-white p-4 flex justify-between items-center cursor-pointer active-feedback" onclick="window.selectDrug('${drug.id}')">
+                        <div class="flex items-start space-x-3">
+                          <div class="mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${drug.highAlert ? 'bg-red-500' : 'bg-blue-500'}"></div>
+                          <div>
+                            <h3 class="font-bold text-slate-800 text-sm capitalize">${drug.genericName}</h3>
+                            <p class="text-[11px] font-semibold text-slate-500 mt-1">${drug.therapeuticClass}</p>
+                          </div>
+                        </div>
+                        <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                       </div>
+                      <!-- Spacer to allow scroll-snap to reveal delete button -->
+                      <div class="snap-end w-24 flex-shrink-0 bg-transparent pointer-events-none"></div>
                     </div>
-                    <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                   </div>
                 `).join('')}
+                
                 ${filteredDrugs.length === 0 ? `
                   <p class="text-center text-sm text-slate-400 py-10 font-medium">No saved monographs found.</p>
-                ` : ''}
+                ` : `
+                  <div class="pt-4 text-center">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full inline-block">Swipe left to delete</span>
+                  </div>
+                `}
               </div>
             </div>
           `;
