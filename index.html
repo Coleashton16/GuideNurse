@@ -105,11 +105,6 @@
       onSnapshot 
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // =========================================================================
-    // GROQ API KEY
-    // =========================================================================
-    const GROQ_API_KEY = "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"; 
-
     // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBHAPAy9Z4kQrWod7Pa0MMrrpppeMpiqZA",
@@ -144,6 +139,7 @@
       passcodeError: '',
       setupStep: localStorage.getItem('rn_passcode') ? 'enter' : 'setup-1',
       tempPasscode: '',
+      groqApiKey: localStorage.getItem('rn_groq_key') || '', // Replaced hardcoded key with BYOK
       activeTab: 'search',
       selectedDrug: null,
       clinicalDrugs: JSON.parse(localStorage.getItem('rn_local_drugs') || '[]'),
@@ -246,9 +242,9 @@
     async function handleAIQuery(queryName) {
       if (!queryName.trim()) return;
       
-      const apiKey = GROQ_API_KEY; 
+      const apiKey = state.groqApiKey; 
       if (!apiKey || apiKey === "") {
-        state.apiError = "Missing API Key configuration.";
+        state.apiError = "Missing API Key. Please add your Groq API Key in the Settings tab.";
         renderApp();
         return;
       }
@@ -377,8 +373,12 @@
     // AI Clinical Scenario Inquiry
     async function handleAssistantQuery() {
       if (!state.assistantPrompt.trim()) return;
-      const apiKey = GROQ_API_KEY;
-      if (!apiKey || apiKey === "") return;
+      const apiKey = state.groqApiKey;
+      if (!apiKey || apiKey === "") {
+        state.assistantResponse = "Missing API Key. Please add your Groq API Key in the Settings tab.";
+        renderApp();
+        return;
+      }
 
       state.assistantLoading = true;
       state.assistantResponse = '';
@@ -894,6 +894,19 @@
             <h1 class="text-xl font-bold text-slate-900 mt-4 mb-2 pl-2">Settings</h1>
             
             <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+              <h3 class="text-sm font-bold text-slate-800">API Configuration</h3>
+              <p class="text-xs text-slate-500 font-medium leading-relaxed">Enter your Groq API key. This is stored securely on your local device.</p>
+              
+              <div class="space-y-3 pt-2">
+                <input type="password" id="settings-api-key" placeholder="gsk_..." value="${state.groqApiKey}"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+                <button onclick="window.saveApiKey()" class="btn-press w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl text-sm transition-all shadow-md shadow-blue-600/20">
+                  Save API Key
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
               <h3 class="text-sm font-bold text-slate-800">Access Control</h3>
               <p class="text-xs text-slate-500 font-medium leading-relaxed">Modify your local device PIN or log out of your clinical session.</p>
               
@@ -1265,6 +1278,13 @@
     };
 
     window.runAssistantQuery = () => { handleAssistantQuery(); };
+
+    window.saveApiKey = () => {
+      const keyInput = document.getElementById('settings-api-key').value.trim();
+      localStorage.setItem('rn_groq_key', keyInput);
+      state.groqApiKey = keyInput;
+      showBanner("API Key saved to device.", "success");
+    };
 
     window.pressPIN = (key) => {
       state.passcodeError = '';
