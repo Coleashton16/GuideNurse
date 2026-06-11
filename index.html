@@ -4,26 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>GuideNurse</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       overscroll-behavior-y: contain;
       -webkit-tap-highlight-color: transparent;
-    }
-    .mono-font {
-      font-family: 'JetBrains Mono', monospace;
+      background-color: #f1f5f9; /* Soft background for desktop */
     }
     /* Native App Scroll Container Physics */
     .app-scroll-container {
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
-    /* Hide scrollbars on navigation bars */
+    /* Hide scrollbars for clean UI */
     .scrollbar-none::-webkit-scrollbar {
       display: none;
     }
@@ -31,60 +31,61 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-    /* Tap target micro-feedback */
+    /* Smooth transition for active states */
     .active-feedback:active {
-      background-color: rgba(204, 251, 241, 0.4);
-    }
-    .btn-feedback:active {
       transform: scale(0.98);
-      filter: brightness(0.95);
+      background-color: #f8fafc;
+    }
+    .btn-press:active {
+      transform: scale(0.96);
+      opacity: 0.9;
+    }
+    /* Loading dots animation */
+    .dot-pulse {
+      animation: pulse-dot 1.4s infinite ease-in-out both;
+    }
+    .dot-pulse-1 { animation-delay: -0.32s; }
+    .dot-pulse-2 { animation-delay: -0.16s; }
+    @keyframes pulse-dot {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
     }
   </style>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              950: '#0a0d16',
-            }
-          }
-        }
-      }
-    }
-  </script>
 </head>
-<body class="bg-slate-950 text-slate-800 antialiased h-[100dvh] w-full flex justify-center items-center overflow-hidden md:p-4">
+<body class="antialiased h-[100dvh] w-full flex justify-center items-center overflow-hidden md:p-6 text-slate-800">
 
-  <div class="w-full h-full max-w-md bg-slate-50 flex flex-col relative shadow-2xl md:border md:border-slate-800 md:rounded-[2rem] overflow-hidden">
+  <!-- Mobile Device Frame -->
+  <div class="w-full h-full max-w-[420px] bg-slate-50 flex flex-col relative md:shadow-2xl md:rounded-[2.5rem] md:h-[92dvh] overflow-hidden ring-1 ring-slate-900/5">
     
-    <div id="system-notification" class="hidden p-3 text-xs font-semibold text-center absolute top-0 left-0 right-0 z-50 shadow-md transition-all duration-300 flex items-center justify-center space-x-2">
+    <!-- SYSTEM BANNER NOTIFICATION -->
+    <div id="system-notification" class="hidden p-3 text-sm font-medium text-center absolute top-0 left-0 right-0 z-50 shadow-md transition-all duration-300 flex items-center justify-center space-x-2">
       <span id="notif-text">System Status Update</span>
     </div>
 
-    <div id="app-viewport" class="flex flex-col h-full flex-grow overflow-hidden">
-      </div>
+    <!-- MAIN VIEW CONTAINER -->
+    <div id="app-viewport" class="flex flex-col h-full flex-grow overflow-hidden bg-slate-50">
+      <!-- Injected by Controller -->
+    </div>
 
-    <nav id="bottom-navigation" class="hidden flex-shrink-0 bg-slate-950 text-white flex justify-around py-2 px-1 border-t border-slate-900 shadow-xl z-30 pb-safe">
-      <button onclick="window.switchTab('search')" id="nav-search" class="flex flex-col items-center flex-1 py-1.5 text-teal-400 font-bold transition-all focus:outline-none">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-        <span class="text-[9px] tracking-wider uppercase font-semibold">Inquiry</span>
+    <!-- BOTTOM NAVIGATION (Dynamic styling handled by JS) -->
+    <nav id="bottom-navigation" class="hidden flex-shrink-0 bg-white border-t border-slate-200 flex justify-around pb-safe z-30 px-2 py-1 relative">
+      <button onclick="window.switchTab('search')" id="nav-search" class="nav-btn flex flex-col items-center flex-1 pt-2 pb-1.5 transition-colors focus:outline-none text-slate-400">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        <span class="text-[10px] font-medium">Search</span>
       </button>
-      <button onclick="window.switchTab('formulary')" id="nav-formulary" class="flex flex-col items-center flex-1 py-1.5 text-slate-500 hover:text-slate-300 transition-all focus:outline-none">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-        <span class="text-[9px] tracking-wider uppercase font-semibold">Index</span>
+      <button onclick="window.switchTab('formulary')" id="nav-formulary" class="nav-btn flex flex-col items-center flex-1 pt-2 pb-1.5 transition-colors focus:outline-none text-slate-400">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+        <span class="text-[10px] font-medium">Formulary</span>
       </button>
-      <button onclick="window.switchTab('tools')" id="nav-tools" class="flex flex-col items-center flex-1 py-1.5 text-slate-500 hover:text-slate-300 transition-all focus:outline-none">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-        <span class="text-[9px] tracking-wider uppercase font-semibold">Calculations</span>
+      <button onclick="window.switchTab('tools')" id="nav-tools" class="nav-btn flex flex-col items-center flex-1 pt-2 pb-1.5 transition-colors focus:outline-none text-slate-400">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+        <span class="text-[10px] font-medium">Tools</span>
       </button>
-      <button onclick="window.switchTab('settings')" id="nav-settings" class="flex flex-col items-center flex-1 py-1.5 text-slate-500 hover:text-slate-300 transition-all focus:outline-none">
-        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-        <span class="text-[9px] tracking-wider uppercase font-semibold">Settings</span>
+      <button onclick="window.switchTab('settings')" id="nav-settings" class="nav-btn flex flex-col items-center flex-1 pt-2 pb-1.5 transition-colors focus:outline-none text-slate-400">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        <span class="text-[10px] font-medium">Settings</span>
       </button>
     </nav>
-
   </div>
 
   <script type="module">
@@ -105,12 +106,11 @@
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // =========================================================================
-    // ⚠️ ACTION REQUIRED: PASTE YOUR GOOGLE GEMINI API KEY HERE
-    // Get it free at: https://aistudio.google.com/app/apikey
+    // GROQ API KEY
     // =========================================================================
-    const GEMINI_API_KEY = "AQ.Ab8RN6KYkMO9cF14KDgdO6UEgqeOexA8KzhWNrHfGLWSBWRJDw"; 
+    const GROQ_API_KEY = "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"; 
 
-    // Your confirmed web app's Firebase configuration
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBHAPAy9Z4kQrWod7Pa0MMrrpppeMpiqZA",
       authDomain: "guidenurse-46052.firebaseapp.com",
@@ -132,10 +132,10 @@
       db = getFirestore(app);
       firebaseActive = true;
     } catch (error) {
-      console.error("Critical: Database linking fault.", error);
+      console.error("Database connection fault.", error);
     }
 
-    // Unified Reactive Application State
+    // Application State
     const state = {
       user: null,
       passcode: localStorage.getItem('rn_passcode') || '',
@@ -151,16 +151,7 @@
       apiLoading: false,
       apiError: null,
       calcType: 'drip',
-      calcInput: {
-        volume: '',
-        time: '',
-        dropFactor: '15',
-        doseOrdered: '',
-        weight: '',
-        concentrationVal: '',
-        concentrationVol: '',
-        timeUnit: 'min'
-      },
+      calcInput: { volume: '', time: '', dropFactor: '15', doseOrdered: '', weight: '', concentrationVal: '', concentrationVol: '', timeUnit: 'min' },
       calcResult: null,
       assistantPrompt: '',
       assistantResponse: '',
@@ -179,18 +170,18 @@
       if (!banner || !text) return;
 
       text.textContent = message;
-      banner.className = `p-3 text-[11px] font-bold tracking-wide text-center absolute top-0 left-0 right-0 z-50 shadow-md flex items-center justify-center space-x-1.5 transition-all duration-300 ${
-        type === 'success' ? 'bg-teal-700 text-white' : 
-        type === 'error' ? 'bg-red-800 text-white' : 'bg-slate-800 text-white'
+      banner.className = `p-4 text-sm font-medium text-center absolute top-0 left-0 right-0 z-50 shadow-lg transition-all duration-300 flex items-center justify-center space-x-2 ${
+        type === 'success' ? 'bg-emerald-600 text-white' : 
+        type === 'error' ? 'bg-red-500 text-white' : 'bg-slate-800 text-white'
       }`;
       banner.classList.remove('hidden');
 
       setTimeout(() => {
         banner.classList.add('hidden');
-      }, 4500);
+      }, 3500);
     }
 
-    // Global Event Listener for Session Authentication
+    // Auth Listener
     if (firebaseActive) {
       onAuthStateChanged(auth, (authUser) => {
         state.user = authUser;
@@ -205,7 +196,7 @@
       });
     }
 
-    // Firestore Integration & Data Synchronization
+    // Firestore Sync
     function syncFirestoreFormulary() {
       if (!firebaseActive || !state.user) return;
       const drugsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'drugs');
@@ -229,13 +220,11 @@
           renderApp();
         },
         (error) => {
-          console.error("Firestore sync subscription failure:", error);
-          showBanner("Cloud sync failed. Check Firestore rules.", "error");
+          console.error("Firestore sync error:", error);
         }
       );
     }
 
-    // Robust Exponential Backoff API Wrapper (Catches Non-200 responses)
     async function fetchWithRetry(url, options, maxRetries = 5) {
       for (let i = 0; i < maxRetries; i++) {
         try {
@@ -253,98 +242,120 @@
       }
     }
 
-    // Real-Time Evidence-Based Monograph Generation via Gemini 2.5 Flash
+    // AI Monograph Generation
     async function handleAIQuery(queryName) {
       if (!queryName.trim()) return;
+      
+      const apiKey = GROQ_API_KEY; 
+      if (!apiKey || apiKey === "") {
+        state.apiError = "Missing API Key configuration.";
+        renderApp();
+        return;
+      }
+
       state.apiLoading = true;
       state.apiError = null;
       renderApp();
 
-      // Ensure key injection functions exactly as designed in this environment
-      const apiKey = ""; 
-      const systemPrompt = `You are an authoritative clinical pharmacology expert. Design comprehensive medical monographs for Registered Nurses. Focus exclusively on active clinical practice parameters, patient safety protocols, IV infusion guidelines, rate restrictions, lab monitoring schedules, and therapeutic drug-drug interactions. Omit academic testing references, mnemonic shortcuts, or generic study tips. Format output exactly in standard scientific schema JSON.`;
-      const userPrompt = `Synthesize clinical monograph and critical safety criteria for: "${queryName}". Access recent medical advisories and consensus literature.`;
-
-      const responseSchema = {
-        type: "OBJECT",
-        properties: {
-          genericName: { type: "STRING" },
-          brandNames: { type: "ARRAY", items: { type: "STRING" } },
-          therapeuticClass: { type: "STRING" },
-          indications: { type: "ARRAY", items: { type: "STRING" } },
-          highAlert: { type: "BOOLEAN" },
-          blackBoxWarning: { type: "STRING" },
-          mechanismOfAction: { type: "STRING" },
-          administration: {
-            type: "OBJECT",
-            properties: {
-              routes: { type: "ARRAY", items: { type: "STRING" } },
-              ivCompatibility: { type: "STRING" },
-              infusionRate: { type: "STRING" },
-              criticalActions: { type: "ARRAY", items: { type: "STRING" } }
-            },
-            required: ["routes", "ivCompatibility", "infusionRate", "criticalActions"]
-          },
-          monitoring: {
-            type: "OBJECT",
-            properties: {
-              vitalSigns: { type: "ARRAY", items: { type: "STRING" } },
-              labValues: { type: "ARRAY", items: { type: "STRING" } },
-              clinicalSigns: { type: "ARRAY", items: { type: "STRING" } }
-            },
-            required: ["vitalSigns", "labValues", "clinicalSigns"]
-          },
-          interactions: { type: "ARRAY", items: { type: "STRING" } },
-          contraindications: { type: "ARRAY", items: { type: "STRING" } },
-          patientEducation: { type: "ARRAY", items: { type: "STRING" } },
-          recentResearch: { type: "STRING" }
+      const jsonExample = {
+        "genericName": "Full generic drug name",
+        "brandNames": ["Brand A", "Brand B"],
+        "therapeuticClass": "Detailed therapeutic and pharmacologic class",
+        "indications": ["Detailed clinical indication 1", "Detailed clinical indication 2", "Detailed clinical indication 3", "Detailed clinical indication 4"],
+        "highAlert": true,
+        "blackBoxWarning": "Detailed multi-sentence paragraph explaining the FDA black box warning. If none, write 'None'.",
+        "mechanismOfAction": "Comprehensive multi-sentence paragraph detailing the exact molecular and physiological mechanism of action.",
+        "administration": {
+          "routes": ["IV Push", "Continuous IV", "PO"],
+          "ivCompatibility": "Exhaustive paragraph detailing primary IV compatibilities, approved diluents (e.g. NS, D5W), and line requirements (e.g. Central line preferred).",
+          "infusionRate": "Exhaustive paragraph covering maximum infusion rates, standard titration, and pushing instructions.",
+          "criticalActions": ["Critical safety action 1", "Critical safety action 2", "Critical safety action 3", "Critical safety action 4"]
         },
-        required: [
-          "genericName", "brandNames", "therapeuticClass", "indications", "highAlert",
-          "blackBoxWarning", "mechanismOfAction", "administration", "monitoring",
-          "interactions", "contraindications", "patientEducation", "recentResearch"
-        ]
+        "monitoring": {
+          "vitalSigns": ["Vital parameter 1", "Vital parameter 2", "Vital parameter 3", "Vital parameter 4"],
+          "labValues": ["Specific lab assay 1", "Specific lab assay 2", "Specific lab assay 3", "Specific lab assay 4"],
+          "clinicalSigns": ["Adverse clinical sign 1", "Adverse clinical sign 2", "Adverse clinical sign 3", "Adverse clinical sign 4"]
+        },
+        "interactions": ["Major drug interaction 1", "Major drug interaction 2", "Major drug interaction 3", "Major drug interaction 4"],
+        "contraindications": ["Absolute contraindication 1", "Absolute contraindication 2", "Relative contraindication 1", "Relative contraindication 2"],
+        "patientEducation": ["Education point 1", "Education point 2", "Education point 3", "Education point 4"],
+        "recentResearch": "Comprehensive multi-sentence paragraph summarizing current clinical consensus, recent advisories, or updated guidelines."
       };
 
+      const systemPrompt = `You are an authoritative clinical pharmacology expert. Design EXHAUSTIVE, HIGHLY DETAILED medical monographs for Registered Nurses. Focus exclusively on active clinical practice parameters, patient safety protocols, IV infusion guidelines, rate restrictions, lab monitoring schedules, and therapeutic drug-drug interactions. 
+      
+      CRITICAL INSTRUCTION: Do NOT be brief. You MUST write full, comprehensive, multi-sentence paragraphs for text fields. You MUST provide at least 4 to 6 long, detailed points for all lists.
+      
+      Output ONLY valid JSON. The JSON MUST use these exact keys and format, replacing the placeholder text with your exhaustive clinical data: ${JSON.stringify(jsonExample)}`;
+      
+      const userPrompt = `Synthesize an EXHAUSTIVE, in-depth clinical monograph and critical safety criteria for: "${queryName}". Include precise monitoring metrics, specific lab values, and comprehensive safety protocols.`;
+
       const payload = {
-        contents: [{ parts: [{ text: userPrompt }] }],
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: responseSchema,
-          temperature: 0.1
-        }
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.2,
+        max_tokens: 4000
       };
 
       try {
         const resultData = await fetchWithRetry(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+          `https://api.groq.com/openai/v1/chat/completions`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
             body: JSON.stringify(payload)
           }
         );
 
-        const parsedText = resultData.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!parsedText) throw new Error("Null response from core AI processing pipeline.");
+        const parsedText = resultData.choices?.[0]?.message?.content;
+        if (!parsedText) throw new Error("No response from AI server.");
 
-        const generatedDrug = JSON.parse(parsedText);
+        const cleanText = parsedText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const generatedDrug = JSON.parse(cleanText);
+
+        const safeGenericName = generatedDrug.genericName || queryName || "Unknown Drug";
+
         const drugWithMeta = {
-          ...generatedDrug,
-          id: generatedDrug.genericName.toLowerCase().replace(/\s+/g, '-'),
+          genericName: safeGenericName,
+          brandNames: Array.isArray(generatedDrug.brandNames) ? generatedDrug.brandNames : [],
+          therapeuticClass: generatedDrug.therapeuticClass || "Unclassified Therapy",
+          indications: Array.isArray(generatedDrug.indications) ? generatedDrug.indications : ["Refer to standard protocols"],
+          highAlert: !!generatedDrug.highAlert,
+          blackBoxWarning: generatedDrug.blackBoxWarning || "None",
+          mechanismOfAction: generatedDrug.mechanismOfAction || "Mechanism not specified.",
+          administration: {
+            routes: Array.isArray(generatedDrug.administration?.routes) ? generatedDrug.administration.routes : ["IV"],
+            ivCompatibility: generatedDrug.administration?.ivCompatibility || "Verify with institutional pharmacy.",
+            infusionRate: generatedDrug.administration?.infusionRate || "Follow facility protocols.",
+            criticalActions: Array.isArray(generatedDrug.administration?.criticalActions) ? generatedDrug.administration.criticalActions : ["Perform secondary check."]
+          },
+          monitoring: {
+            vitalSigns: Array.isArray(generatedDrug.monitoring?.vitalSigns) ? generatedDrug.monitoring.vitalSigns : ["Standard vitals assessment"],
+            labValues: Array.isArray(generatedDrug.monitoring?.labValues) ? generatedDrug.monitoring.labValues : ["Standard metabolic panel"],
+            clinicalSigns: Array.isArray(generatedDrug.monitoring?.clinicalSigns) ? generatedDrug.monitoring.clinicalSigns : ["Monitor for adverse signs"]
+          },
+          interactions: Array.isArray(generatedDrug.interactions) ? generatedDrug.interactions : ["Cross-reference compatibility database."],
+          contraindications: Array.isArray(generatedDrug.contraindications) ? generatedDrug.contraindications : ["Review full patient history."],
+          patientEducation: Array.isArray(generatedDrug.patientEducation) ? generatedDrug.patientEducation : ["Advise patient to report discomfort."],
+          recentResearch: generatedDrug.recentResearch || "Consult primary literature.",
+          id: safeGenericName.toLowerCase().replace(/\s+/g, '-'),
           createdAt: new Date().toISOString(),
           references: [{ title: "Primary Monograph & Safety Protocols", uri: "" }]
         };
 
-        // Saving to live Firestore 
         if (firebaseActive && state.user) {
           try {
             const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'drugs', drugWithMeta.id);
             await setDoc(docRef, drugWithMeta);
           } catch (fsErr) {
-            console.error("Cloud Sync Warning - Make sure Firestore Rules allow write access:", fsErr);
-            showBanner("Database Save Blocked: Check Firestore Rules", "error");
+            console.error("Cloud Sync Warning", fsErr);
           }
         }
 
@@ -353,10 +364,10 @@
         state.clinicalDrugs = updatedLocal;
         state.selectedDrug = drugWithMeta;
         state.searchQuery = '';
-        showBanner(`${drugWithMeta.genericName.toUpperCase()} synthesized successfully.`, "success");
+        showBanner(`${drugWithMeta.genericName} generated.`, "success");
       } catch (err) {
         console.error("Synthesis Exception:", err);
-        state.apiError = "Inquiry failed. " + (err.message || "Confirm connection or query format.");
+        state.apiError = "Search failed. " + (err.message || "Please try again.");
       } finally {
         state.apiLoading = false;
         renderApp();
@@ -366,131 +377,136 @@
     // AI Clinical Scenario Inquiry
     async function handleAssistantQuery() {
       if (!state.assistantPrompt.trim()) return;
+      const apiKey = GROQ_API_KEY;
+      if (!apiKey || apiKey === "") return;
+
       state.assistantLoading = true;
       state.assistantResponse = '';
       renderApp();
 
-      const apiKey = "";
-      const systemPrompt = `You are an expert Clinical Pharmacologist and Nursing Educator. Analyze the scenario using standard clinical, evidence-based guidelines. Respond in a brief, sterile, and professional clinical layout. Avoid informal or casual terminology, and focus entirely on quantitative safe parameters and immediate clinical workflows.`;
+      const systemPrompt = `You are an expert Clinical Pharmacologist and Nursing Educator. Analyze the scenario using standard clinical, evidence-based guidelines. Respond in a brief, clear, and professional clinical format. Focus on safe parameters and immediate clinical workflows.`;
 
       const payload = {
-        contents: [{ parts: [{ text: state.assistantPrompt }] }],
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        tools: [{ google_search: {} }]
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: state.assistantPrompt }
+        ],
+        temperature: 0.3
       };
 
       try {
         const response = await fetchWithRetry(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+          `https://api.groq.com/openai/v1/chat/completions`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
             body: JSON.stringify(payload)
           }
         );
-        state.assistantResponse = response.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to synthesize clinical criteria.";
+        state.assistantResponse = response.choices?.[0]?.message?.content || "Unable to process query.";
       } catch (e) {
-        console.error("Assistant Exception:", e);
-        state.assistantResponse = "Server pipeline unreachable. " + (e.message || "Review local link.");
+        state.assistantResponse = "Connection error. Please try again.";
       } finally {
         state.assistantLoading = false;
         renderApp();
       }
     }
 
-    // Fluid Mobile Rendering Engine 
+    // Helper to update bottom nav colors safely
+    function updateBottomNavUI() {
+      const tabs = ['search', 'formulary', 'tools', 'settings'];
+      tabs.forEach(tab => {
+        const el = document.getElementById(`nav-${tab}`);
+        if (el) {
+          if (state.activeTab === tab) {
+            el.classList.remove('text-slate-400');
+            el.classList.add('text-blue-600');
+          } else {
+            el.classList.remove('text-blue-600');
+            el.classList.add('text-slate-400');
+          }
+        }
+      });
+    }
+
+    // Main App Rendering
     function renderApp() {
       const container = document.getElementById('app-viewport');
       const bottomNav = document.getElementById('bottom-navigation');
       if (!container) return;
 
-      // filtered dataset computed reactively
-      const filteredDrugs = state.clinicalDrugs.filter(d => 
-        d.genericName.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-        d.brandNames.some(b => b.toLowerCase().includes(state.searchQuery.toLowerCase())) ||
-        d.therapeuticClass.toLowerCase().includes(state.searchQuery.toLowerCase())
-      );
+      const queryLower = (state.searchQuery || "").toLowerCase();
+      const filteredDrugs = state.clinicalDrugs.filter(d => {
+        const genName = d.genericName || "";
+        const brandNames = Array.isArray(d.brandNames) ? d.brandNames : [];
+        const tClass = d.therapeuticClass || "";
+        return genName.toLowerCase().includes(queryLower) ||
+               brandNames.some(b => (b || "").toLowerCase().includes(queryLower)) ||
+               tClass.toLowerCase().includes(queryLower);
+      });
 
-      // Gate 1: Firebase Professional Account Gate
+      // ----------------------------------------------------
+      // GATE 1: AUTHENTICATION
+      // ----------------------------------------------------
       if (!state.user) {
         bottomNav.classList.add('hidden');
         container.innerHTML = `
-          <div class="flex-grow flex flex-col justify-between p-6 bg-slate-950 text-white h-full overflow-y-auto">
-            <div class="text-center mt-12 flex-shrink-0">
-              <div class="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-500/20">
-                <svg class="w-8 h-8 text-slate-950" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+          <div class="flex flex-col justify-between h-full bg-slate-50 p-6 overflow-y-auto">
+            <div class="mt-16 flex flex-col items-center">
+              <div class="w-20 h-20 bg-blue-600 rounded-[1.5rem] shadow-lg shadow-blue-600/30 flex items-center justify-center mb-6">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
               </div>
-              <h1 class="text-2xl font-bold tracking-tight text-white">GuideNurse</h1>
-              <p class="text-slate-500 text-[10px] tracking-wider uppercase font-semibold mt-1">Secure Clinical Authentication</p>
+              <h1 class="text-3xl font-bold text-slate-900 tracking-tight">GuideNurse</h1>
+              <p class="text-sm text-slate-500 font-medium mt-2">Clinical Pharmacology Reference</p>
             </div>
 
-            <form id="auth-form" class="space-y-4 my-auto max-w-xs w-full mx-auto py-8">
-              <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Email Address</label>
-                <input
-                  type="email"
-                  id="auth-email-input"
-                  required
-                  placeholder="name@hospital.org"
-                  value="${state.authEmail}"
-                  class="w-full bg-slate-900 border border-slate-800 rounded-lg py-2.5 px-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-teal-500/30 focus:border-teal-500 transition-all"
-                />
-              </div>
-
-              <div>
-                <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Password</label>
-                <input
-                  type="password"
-                  id="auth-password-input"
-                  required
-                  placeholder="••••••••"
-                  value="${state.authPassword}"
-                  class="w-full bg-slate-900 border border-slate-800 rounded-lg py-2.5 px-3 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-teal-500/30 focus:border-teal-500 transition-all"
-                />
-              </div>
-
-              ${state.authError ? `
-                <div class="p-2.5 bg-red-950/20 border border-red-900/30 text-red-400 text-[10px] rounded-lg flex items-start space-x-2">
-                  <svg class="w-3.5 h-3.5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                  <p class="leading-normal">${state.authError}</p>
+            <div class="w-full max-w-sm mx-auto bg-white p-6 rounded-3xl shadow-sm border border-slate-100 my-auto">
+              <form id="auth-form" class="space-y-4">
+                <div>
+                  <label class="text-xs font-semibold text-slate-600 ml-1">Email Address</label>
+                  <input type="email" id="auth-email-input" required placeholder="nurse@hospital.org" value="${state.authEmail}"
+                    class="mt-1 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
                 </div>
-              ` : ''}
+                <div>
+                  <label class="text-xs font-semibold text-slate-600 ml-1">Password</label>
+                  <input type="password" id="auth-password-input" required placeholder="••••••••" value="${state.authPassword}"
+                    class="mt-1 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+                </div>
 
-              <button
-                type="submit"
-                id="auth-submit-btn"
-                class="btn-feedback w-full bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold py-2.5 rounded-lg text-xs uppercase tracking-widest transition-all"
-              >
-                ${state.authLoading ? "Authenticating..." : state.isSignUp ? "Create Account" : "Log In"}
-              </button>
+                ${state.authError ? `
+                  <div class="p-3 bg-red-50 border border-red-100 text-red-600 text-xs rounded-xl flex items-start space-x-2">
+                    <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <p>${state.authError}</p>
+                  </div>
+                ` : ''}
 
-              <div class="text-center pt-2">
-                <button
-                  type="button"
-                  id="auth-mode-toggle"
-                  class="text-[10px] text-slate-400 hover:text-teal-400 uppercase tracking-wider font-semibold transition-colors"
-                >
-                  ${state.isSignUp ? "Already have an account? Sign In" : "Need an account? Register"}
+                <button type="submit" class="btn-press w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-blue-600/20 mt-2">
+                  ${state.authLoading ? "Verifying..." : state.isSignUp ? "Create Account" : "Secure Login"}
+                </button>
+              </form>
+
+              <div class="text-center mt-6">
+                <button type="button" id="auth-mode-toggle" class="text-xs text-slate-500 hover:text-blue-600 font-medium transition-colors">
+                  ${state.isSignUp ? "Already registered? Sign In" : "Need access? Register"}
                 </button>
               </div>
-            </form>
+            </div>
 
-            <div class="text-center flex-shrink-0 text-[8px] text-slate-600 tracking-widest pb-4">
-              SECURED LOGISTICS COMPLIANCE HUB — PRIVACY SHIELD ENFORCED
+            <div class="text-center text-[10px] text-slate-400 font-medium pb-4">
+              Secure Health Information System
             </div>
           </div>
         `;
 
-        // Interactive Event Bindings
-        document.getElementById('auth-email-input').value = state.authEmail;
-        document.getElementById('auth-password-input').value = state.authPassword;
-        document.getElementById('auth-email-input').addEventListener('input', (e) => { state.authEmail = e.target.value; });
-        document.getElementById('auth-password-input').addEventListener('input', (e) => { state.authPassword = e.target.value; });
-        document.getElementById('auth-mode-toggle').addEventListener('click', () => {
-          state.isSignUp = !state.isSignUp;
-          state.authError = '';
-          renderApp();
-        });
+        document.getElementById('auth-email-input').addEventListener('input', (e) => state.authEmail = e.target.value);
+        document.getElementById('auth-password-input').addEventListener('input', (e) => state.authPassword = e.target.value);
+        document.getElementById('auth-mode-toggle').addEventListener('click', () => { state.isSignUp = !state.isSignUp; state.authError = ''; renderApp(); });
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
           e.preventDefault();
           state.authLoading = true;
@@ -499,13 +515,11 @@
           try {
             if (state.isSignUp) {
               await createUserWithEmailAndPassword(auth, state.authEmail, state.authPassword);
-              showBanner("Account active. Configure hardware lock PIN.", "success");
+              showBanner("Account created. Set your device PIN.", "success");
             } else {
               await signInWithEmailAndPassword(auth, state.authEmail, state.authPassword);
-              showBanner("Access verified.", "success");
             }
           } catch (err) {
-            console.error(err);
             state.authError = err.message.replace("Firebase:", "").trim();
           } finally {
             state.authLoading = false;
@@ -515,56 +529,58 @@
         return;
       }
 
-      // Gate 2: Passcode PIN Screen (Only available after successful Auth verification)
+      // ----------------------------------------------------
+      // GATE 2: PIN LOCK
+      // ----------------------------------------------------
       if (state.isLocked) {
         bottomNav.classList.add('hidden');
         container.innerHTML = `
-          <div class="flex-grow flex flex-col justify-between p-6 bg-slate-950 text-white h-full overflow-y-auto">
-            <div class="text-center mt-10 flex-shrink-0">
-              <div class="w-10 h-10 bg-teal-500/10 rounded-full flex items-center justify-center mx-auto mb-2.5 border border-teal-500/20">
-                <svg class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+          <div class="flex-grow flex flex-col justify-between p-6 bg-slate-50 text-slate-800 h-full overflow-y-auto">
+            <div class="text-center mt-16 flex-shrink-0">
+              <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-200">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
               </div>
-              <h2 class="text-xs font-bold tracking-widest text-slate-300 uppercase">Device Security Lock</h2>
-              <p class="text-[9px] text-slate-500 uppercase mt-1 tracking-wider">${state.user.email}</p>
+              <h2 class="text-lg font-bold text-slate-900">Device Locked</h2>
+              <p class="text-xs text-slate-500 mt-1">${state.user.email}</p>
             </div>
 
             <div class="text-center my-auto py-8">
-              <span class="text-[10px] text-slate-400 uppercase tracking-widest block mb-4 font-semibold">
-                ${state.setupStep === 'setup-1' ? 'Create 4-Digit PIN' : ''}
+              <span class="text-sm text-slate-600 font-medium block mb-6">
+                ${state.setupStep === 'setup-1' ? 'Create a 4-Digit PIN' : ''}
                 ${state.setupStep === 'setup-2' ? 'Confirm 4-Digit PIN' : ''}
-                ${state.setupStep === 'enter' ? 'Enter 4-Digit PIN' : ''}
+                ${state.setupStep === 'enter' ? 'Enter Passcode' : ''}
               </span>
 
-              <div class="flex justify-center space-x-5 mb-2">
+              <div class="flex justify-center space-x-6 mb-2">
                 ${[0, 1, 2, 3].map(idx => `
-                  <div class="w-3.5 h-3.5 rounded-full border border-slate-700 transition-all duration-200 ${
-                    state.passcodeInput.length > idx ? 'bg-teal-400 border-teal-400 shadow-lg shadow-teal-400/30 scale-110' : 'bg-transparent'
+                  <div class="w-4 h-4 rounded-full transition-all duration-200 ${
+                    state.passcodeInput.length > idx ? 'bg-blue-600 scale-110' : 'bg-slate-300'
                   }"></div>
                 `).join('')}
               </div>
 
               ${state.passcodeError ? `
-                <div class="text-red-400 text-[10px] font-bold uppercase tracking-wider bg-red-950/20 px-3 py-1 mt-3 border border-red-900/30 rounded inline-block">
+                <div class="text-red-500 text-xs font-medium mt-4">
                   ${state.passcodeError}
                 </div>
               ` : ''}
             </div>
 
-            <div class="mb-6 flex-shrink-0">
-              <div class="grid grid-cols-3 gap-y-3 gap-x-6 max-w-xs mx-auto">
+            <div class="mb-10 flex-shrink-0">
+              <div class="grid grid-cols-3 gap-y-4 gap-x-6 max-w-[260px] mx-auto">
                 ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => `
-                  <button onclick="window.pressPIN('${num}')" class="w-14 h-14 rounded-full bg-slate-900 border border-slate-800/80 hover:bg-slate-850 active:bg-slate-800 transition-colors flex items-center justify-center text-xl font-medium text-slate-200 mx-auto">
+                  <button onclick="window.pressPIN('${num}')" class="btn-press w-16 h-16 rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-100 flex items-center justify-center text-2xl font-semibold text-slate-800 mx-auto">
                     ${num}
                   </button>
                 `).join('')}
-                <div class="w-14 h-14 flex items-center justify-center">
-                  <button onclick="window.signoutUser()" class="text-[10px] text-red-500 font-bold uppercase tracking-widest">Logout</button>
+                <div class="w-16 h-16 flex items-center justify-center">
+                  <button onclick="window.signoutUser()" class="text-xs text-slate-500 font-semibold hover:text-slate-800">Log Out</button>
                 </div>
-                <button onclick="window.pressPIN('0')" class="w-14 h-14 rounded-full bg-slate-900 border border-slate-800/80 hover:bg-slate-850 active:bg-slate-800 transition-colors flex items-center justify-center text-xl font-medium text-slate-200 mx-auto">
+                <button onclick="window.pressPIN('0')" class="btn-press w-16 h-16 rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-100 flex items-center justify-center text-2xl font-semibold text-slate-800 mx-auto">
                   0
                 </button>
-                <button onclick="window.pressPIN('delete')" class="w-14 h-14 rounded-full bg-slate-900 hover:bg-slate-850 active:bg-slate-800 transition-colors flex items-center justify-center text-[10px] font-bold text-slate-400 mx-auto uppercase tracking-wider">
-                  Clear
+                <button onclick="window.pressPIN('delete')" class="btn-press w-16 h-16 rounded-full bg-transparent hover:bg-slate-200 flex items-center justify-center text-sm font-semibold text-slate-600 mx-auto">
+                  Del
                 </button>
               </div>
             </div>
@@ -573,10 +589,13 @@
         return;
       }
 
-      // Main Unlocked Application Structure
+      // ----------------------------------------------------
+      // UNLOCKED MAIN APP
+      // ----------------------------------------------------
       bottomNav.classList.remove('hidden');
+      updateBottomNavUI();
 
-      // Inquiry & Monograph Search Portal View
+      // TAB: SEARCH
       if (state.activeTab === 'search') {
         if (state.selectedDrug) {
           renderDrugDetail(state.selectedDrug, container);
@@ -584,30 +603,20 @@
           container.innerHTML = `
             <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
               
-              <div class="bg-slate-950 text-white p-5 border-b border-slate-900 flex-shrink-0">
-                <div class="flex items-center space-x-2 mb-2">
-                  <svg class="w-4 h-4 text-teal-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-                  <h2 class="text-xs font-bold uppercase tracking-widest text-slate-100">GuideNurse Search</h2>
-                </div>
-                <p class="text-[11px] text-slate-400 leading-relaxed font-normal">
-                  Enter official pharmaceutical generic names to synthesize evidence-based clinical reference profiles.
-                </p>
+              <div class="bg-white p-5 border-b border-slate-200 shadow-sm z-10 flex-shrink-0 pt-6">
+                <h1 class="text-xl font-bold text-slate-900">Search</h1>
+                <p class="text-xs text-slate-500 mt-1 mb-4 font-medium">Find detailed clinical monographs.</p>
                 
-                <div class="mt-4 flex space-x-2">
+                <div class="flex space-x-2">
                   <div class="relative flex-grow">
-                    <input
-                      type="text"
-                      id="search-query-input"
-                      placeholder="Enter molecular generic name..."
-                      value="${state.searchQuery}"
-                      class="w-full bg-slate-900 border border-slate-800 rounded-lg py-2.5 px-3 pl-9 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-teal-500/30"
-                    />
-                    <div class="absolute left-3 top-3.5 text-slate-600">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    <input type="text" id="search-query-input" placeholder="e.g., Amiodarone" value="${state.searchQuery}"
+                      class="w-full bg-slate-100 border-none rounded-2xl py-3 px-4 pl-11 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                    <div class="absolute left-4 top-3 text-slate-400">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     </div>
                   </div>
-                  <button id="search-action-btn" class="btn-feedback bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold px-4 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                  <button id="search-action-btn" class="btn-press bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 rounded-2xl flex items-center justify-center shadow-md shadow-blue-600/20">
+                    Lookup
                   </button>
                 </div>
               </div>
@@ -615,62 +624,58 @@
               <div class="flex-grow app-scroll-container p-4 space-y-4">
                 
                 ${state.apiLoading ? `
-                  <div class="flex flex-col items-center justify-center py-12 space-y-4 bg-white rounded-xl border border-slate-200">
-                    <div class="relative w-16 h-16 flex items-center justify-center">
-                      <div class="absolute w-16 h-16 border border-teal-500/20 rounded-full animate-spin [animation-duration:8s]"></div>
-                      <div class="absolute w-11 h-11 border border-slate-200 rounded-full"></div>
-                      <div class="absolute w-8 h-8 bg-teal-500/5 rounded-full animate-ping [animation-duration:2.5s]"></div>
-                      <div class="absolute w-3 h-3 bg-slate-950 rounded-full"></div>
+                  <div class="flex flex-col items-center justify-center py-20 space-y-5">
+                    <div class="flex space-x-2">
+                      <div class="w-2.5 h-2.5 bg-blue-500 rounded-full dot-pulse dot-pulse-1"></div>
+                      <div class="w-2.5 h-2.5 bg-blue-500 rounded-full dot-pulse dot-pulse-2"></div>
+                      <div class="w-2.5 h-2.5 bg-blue-500 rounded-full dot-pulse"></div>
                     </div>
-                    <span class="text-[9px] uppercase font-bold tracking-widest text-slate-500">Retrieving Grounded Monograph Data...</span>
+                    <p class="text-sm font-medium text-slate-500">Searching clinical databases...</p>
                   </div>
                 ` : ''}
 
                 ${state.apiError ? `
-                  <div class="p-3.5 bg-red-50 border border-red-200 rounded-lg text-red-800 text-[11px] flex items-start space-x-2.5">
-                    <svg class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                  <div class="p-4 bg-red-50 rounded-2xl border border-red-100 text-red-700 text-sm flex items-start space-x-3">
+                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                     <p class="font-medium">${state.apiError}</p>
                   </div>
                 ` : ''}
 
-                <div class="space-y-2 pb-6">
-                  <div class="flex items-center justify-between text-slate-500 px-1 text-[9px] font-bold tracking-wider uppercase">
-                    <span>Active Institutional Formulary</span>
-                    <span>${filteredDrugs.length} Monographs</span>
-                  </div>
+                ${!state.apiLoading && !state.apiError ? `
+                  <div class="space-y-3 pb-6">
+                    ${filteredDrugs.length > 0 ? `
+                      <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider pl-1 mb-2">Recent Searches</h3>
+                    ` : ''}
 
-                  ${filteredDrugs.length === 0 ? `
-                    <div class="bg-white rounded-xl p-8 text-center border border-slate-200">
-                      <p class="text-xs text-slate-400 font-medium">
-                        No active matching drugs detected. Submit a query to generate.
-                      </p>
-                    </div>
-                  ` : `
-                    <div class="space-y-2.5">
-                      ${filteredDrugs.map(drug => `
-                        <div onclick="window.selectDrug('${drug.id}')" class="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-350 cursor-pointer active-feedback transition-all flex justify-between items-center relative overflow-hidden">
-                          ${drug.highAlert ? `<div class="absolute top-0 bottom-0 left-0 w-1 bg-red-600"></div>` : ''}
-                          <div class="pl-1">
-                            <div class="flex items-center space-x-2">
-                              <h3 class="font-bold text-slate-900 text-xs capitalize">${drug.genericName}</h3>
-                              ${drug.highAlert ? `<span class="text-[7px] bg-red-50 text-red-700 px-1.5 py-0.5 rounded font-black tracking-widest border border-red-100 uppercase">High Alert</span>` : ''}
-                            </div>
-                            <p class="text-[10px] text-slate-500 mt-0.5 line-clamp-1">${drug.brandNames.join(', ')}</p>
-                          </div>
-                          <div class="text-slate-400">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    ${filteredDrugs.length === 0 && state.searchQuery === '' ? `
+                      <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4 text-slate-400">
+                          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-slate-700">No drugs found</h3>
+                        <p class="text-sm text-slate-500 mt-1">Search for a generic medication to generate a new clinical profile.</p>
+                      </div>
+                    ` : ''}
+
+                    ${filteredDrugs.map(drug => `
+                      <div onclick="window.selectDrug('${drug.id}')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all active-feedback cursor-pointer flex justify-between items-center group">
+                        <div class="flex items-start space-x-3">
+                          <div class="mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${drug.highAlert ? 'bg-red-500' : 'bg-blue-500'}"></div>
+                          <div>
+                            <h3 class="font-bold text-slate-800 text-sm capitalize">${drug.genericName}</h3>
+                            <p class="text-xs text-slate-500 line-clamp-1 mt-0.5">${drug.brandNames.join(', ')}</p>
+                            <span class="inline-block mt-2 text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">${drug.therapeuticClass}</span>
                           </div>
                         </div>
-                      `).join('')}
-                    </div>
-                  `}
-                </div>
-
+                        <svg class="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : ''}
               </div>
             </div>
           `;
 
-          // Bind search parameters on view initialization
           const queryInput = document.getElementById('search-query-input');
           if (queryInput) {
             queryInput.value = state.searchQuery;
@@ -681,46 +686,39 @@
         }
       }
 
-      // Tab Panel: Formulary Search
+      // TAB: FORMULARY
       if (state.activeTab === 'formulary') {
         if (state.selectedDrug) {
           renderDrugDetail(state.selectedDrug, container);
         } else {
           container.innerHTML = `
             <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
-              <div class="bg-white p-4 border-b border-slate-200 flex-shrink-0">
-                <h2 class="text-xs font-bold text-slate-950 uppercase tracking-widest">Master Index</h2>
-                <div class="relative mt-2.5">
-                  <input
-                    type="text"
-                    id="formulary-search-input"
-                    placeholder="Filter compiled formulations..."
-                    value="${state.searchQuery}"
-                    class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 pl-9 text-xs focus:outline-none focus:ring-1 focus:ring-teal-500/20"
-                  />
-                  <div class="absolute left-3 top-2.5 text-slate-400">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <div class="bg-white p-5 border-b border-slate-200 shadow-sm z-10 flex-shrink-0 pt-6">
+                <h1 class="text-xl font-bold text-slate-900">Saved Formulary</h1>
+                <div class="relative mt-4">
+                  <input type="text" id="formulary-search-input" placeholder="Filter saved drugs..." value="${state.searchQuery}"
+                    class="w-full bg-slate-100 border-none rounded-xl py-2.5 px-4 pl-10 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                  <div class="absolute left-3.5 top-2.5 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </div>
                 </div>
               </div>
 
-              <div class="flex-grow app-scroll-container p-4 pb-6 space-y-2">
+              <div class="flex-grow app-scroll-container p-4 pb-6 space-y-3">
                 ${filteredDrugs.map(drug => `
-                  <div onclick="window.selectDrug('${drug.id}')" class="bg-white p-4 rounded-xl border border-slate-200/80 hover:border-slate-300 cursor-pointer active-feedback flex justify-between items-center">
-                    <div class="flex items-center space-x-3">
-                      <div class="w-1.5 h-1.5 rounded-full ${drug.highAlert ? 'bg-red-500' : 'bg-teal-500'}"></div>
+                  <div onclick="window.selectDrug('${drug.id}')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all active-feedback flex justify-between items-center cursor-pointer">
+                    <div class="flex items-start space-x-3">
+                      <div class="mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${drug.highAlert ? 'bg-red-500' : 'bg-blue-500'}"></div>
                       <div>
-                        <h3 class="font-bold text-slate-950 text-xs capitalize">${drug.genericName}</h3>
-                        <p class="text-[9px] text-slate-500 uppercase tracking-wider font-semibold mt-0.5">${drug.therapeuticClass}</p>
+                        <h3 class="font-bold text-slate-800 text-sm capitalize">${drug.genericName}</h3>
+                        <p class="text-[11px] font-semibold text-slate-500 mt-1">${drug.therapeuticClass}</p>
                       </div>
                     </div>
-                    <div class="text-slate-400">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-                    </div>
+                    <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                   </div>
                 `).join('')}
                 ${filteredDrugs.length === 0 ? `
-                  <p class="text-center text-xs text-slate-400 py-10 font-medium">No results match lookup criteria.</p>
+                  <p class="text-center text-sm text-slate-400 py-10 font-medium">No saved monographs found.</p>
                 ` : ''}
               </div>
             </div>
@@ -738,118 +736,116 @@
         }
       }
 
-      // Tab Panel: Calculations & Assistant Scenarios
+      // TAB: TOOLS
       if (state.activeTab === 'tools') {
         container.innerHTML = `
           <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
-            <div class="bg-slate-950 p-2 border-b border-slate-900 flex-shrink-0">
-              <div class="bg-slate-900 p-0.5 rounded-lg flex text-white">
-                <button onclick="window.setCalcType('drip')" class="flex-grow py-2 text-[9px] uppercase font-bold tracking-widest rounded transition-all ${state.calcType === 'drip' ? 'bg-teal-600 text-slate-950' : 'text-slate-400 hover:text-slate-200'}">Drip Rate</button>
-                <button onclick="window.setCalcType('dose')" class="flex-grow py-2 text-[9px] uppercase font-bold tracking-widest rounded transition-all ${state.calcType === 'dose' ? 'bg-teal-600 text-slate-950' : 'text-slate-400 hover:text-slate-200'}">Infusion Dose</button>
-                <button onclick="window.setCalcType('assistant')" class="flex-grow py-2 text-[9px] uppercase font-bold tracking-widest rounded transition-all ${state.calcType === 'assistant' ? 'bg-teal-600 text-slate-950' : 'text-slate-400 hover:text-slate-200'}">Assistant</button>
+            <div class="bg-white p-4 border-b border-slate-200 z-10 flex-shrink-0 pt-6">
+              <h1 class="text-xl font-bold text-slate-900 mb-4">Clinical Tools</h1>
+              
+              <!-- Segmented Control -->
+              <div class="flex p-1 bg-slate-100 rounded-xl space-x-1">
+                <button onclick="window.setCalcType('drip')" class="flex-1 px-3 py-2 text-[11px] font-bold rounded-lg transition-all ${state.calcType === 'drip' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}">Drip Rate</button>
+                <button onclick="window.setCalcType('dose')" class="flex-1 px-3 py-2 text-[11px] font-bold rounded-lg transition-all ${state.calcType === 'dose' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}">Dosing</button>
+                <button onclick="window.setCalcType('assistant')" class="flex-1 px-3 py-2 text-[11px] font-bold rounded-lg transition-all ${state.calcType === 'assistant' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}">AI Consult</button>
               </div>
             </div>
 
             <div class="flex-grow app-scroll-container p-4 pb-6">
               ${state.calcType !== 'assistant' ? `
-                <div class="bg-white p-5 rounded-xl border border-slate-200/80 space-y-4">
-                  <h3 class="text-xs font-bold text-slate-950 uppercase tracking-widest">
-                    ${state.calcType === 'drip' ? 'IV Drip Rate Calculation' : 'Infusion Rate Calculation'}
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                  <h3 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">
+                    ${state.calcType === 'drip' ? 'IV Drip Rate Calculator' : 'Infusion Rate Calculator'}
                   </h3>
 
                   ${state.calcType === 'drip' ? `
                     <div>
-                      <label class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Total Infusion Volume (mL)</label>
-                      <input type="number" id="calc-vol" placeholder="e.g. 1000" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-950 focus:outline-none" />
+                      <label class="text-xs font-semibold text-slate-600 block mb-1.5">Total Volume (mL)</label>
+                      <input type="number" id="calc-vol" placeholder="e.g. 1000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Time (Hours)</label>
-                        <input type="number" id="calc-time" placeholder="e.g. 8" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-950 focus:outline-none" />
+                        <label class="text-xs font-semibold text-slate-600 block mb-1.5">Time (Hours)</label>
+                        <input type="number" id="calc-time" placeholder="e.g. 8" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
                       </div>
                       <div>
-                        <label class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Drop Factor (gtts/mL)</label>
-                        <select id="calc-drop" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-950 focus:outline-none">
-                          <option value="10" ${state.calcInput.dropFactor === '10' ? 'selected' : ''}>10 (Macro)</option>
-                          <option value="15" ${state.calcInput.dropFactor === '15' ? 'selected' : ''}>15 (Standard)</option>
-                          <option value="20" ${state.calcInput.dropFactor === '20' ? 'selected' : ''}>20 (Standard)</option>
-                          <option value="60" ${state.calcInput.dropFactor === '60' ? 'selected' : ''}>60 (Micro)</option>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1.5">Drop Factor</label>
+                        <select id="calc-drop" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                          <option value="10" ${state.calcInput.dropFactor === '10' ? 'selected' : ''}>10 gtts/mL</option>
+                          <option value="15" ${state.calcInput.dropFactor === '15' ? 'selected' : ''}>15 gtts/mL</option>
+                          <option value="20" ${state.calcInput.dropFactor === '20' ? 'selected' : ''}>20 gtts/mL</option>
+                          <option value="60" ${state.calcInput.dropFactor === '60' ? 'selected' : ''}>60 gtts/mL</option>
                         </select>
                       </div>
                     </div>
                   ` : `
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <label class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Prescribed Dosage</label>
-                        <input type="number" id="calc-dose" placeholder="e.g. 5" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-950 focus:outline-none" />
+                        <label class="text-xs font-semibold text-slate-600 block mb-1.5">Prescribed Dose</label>
+                        <input type="number" id="calc-dose" placeholder="e.g. 5" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
                       </div>
                       <div>
-                        <label class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Dosing Parameters</label>
-                        <select id="calc-unit" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-950 focus:outline-none">
-                          <option value="min" ${state.calcInput.timeUnit === 'min' ? 'selected' : ''}>mcg/kg/min or mcg/min</option>
-                          <option value="hr" ${state.calcInput.timeUnit === 'hr' ? 'selected' : ''}>mg/hr or units/hr</option>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1.5">Rate Unit</label>
+                        <select id="calc-unit" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                          <option value="min" ${state.calcInput.timeUnit === 'min' ? 'selected' : ''}>/min</option>
+                          <option value="hr" ${state.calcInput.timeUnit === 'hr' ? 'selected' : ''}>/hr</option>
                         </select>
                       </div>
                     </div>
                     <div>
-                      <label class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Patient Body Mass (kg)</label>
-                      <input type="number" id="calc-weight" placeholder="Leave blank if not weight-based" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-950 focus:outline-none" />
+                      <label class="text-xs font-semibold text-slate-600 block mb-1.5">Patient Weight (kg) <span class="text-slate-400 font-normal">(Optional)</span></label>
+                      <input type="number" id="calc-weight" placeholder="Leave blank if not weight-based" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20" />
                     </div>
-                    <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-2">
-                      <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Fluid Concentration</span>
-                      <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                      <span class="text-xs font-bold text-slate-700 block">Fluid Concentration</span>
+                      <div class="grid grid-cols-2 gap-4">
                         <div>
-                          <label class="text-[8px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Drug Mass (mg/mcg)</label>
-                          <input type="number" id="calc-conc-val" placeholder="e.g. 400" class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-950 focus:outline-none" />
+                          <label class="text-[10px] font-semibold text-slate-500 block mb-1">Drug Mass (mg/mcg)</label>
+                          <input type="number" id="calc-conc-val" placeholder="e.g. 400" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-900 focus:outline-none focus:border-blue-500" />
                         </div>
                         <div>
-                          <label class="text-[8px] uppercase font-bold text-slate-400 tracking-wider block mb-1">Diluent Volume (mL)</label>
-                          <input type="number" id="calc-conc-vol" placeholder="e.g. 250" class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-950 focus:outline-none" />
+                          <label class="text-[10px] font-semibold text-slate-500 block mb-1">Diluent Vol (mL)</label>
+                          <input type="number" id="calc-conc-vol" placeholder="e.g. 250" class="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-sm text-slate-900 focus:outline-none focus:border-blue-500" />
                         </div>
                       </div>
                     </div>
                   `}
 
-                  <button onclick="window.runCalculation()" class="btn-feedback w-full bg-slate-950 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-widest transition-all">
-                    Run Calculation
+                  <button onclick="window.runCalculation()" class="btn-press w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-blue-600/20 mt-2">
+                    Calculate Rate
                   </button>
 
                   ${state.calcResult ? `
-                    <div class="mt-3 p-4 rounded-lg border ${state.calcResult.error ? 'bg-red-50 border-red-100 text-red-800' : 'bg-teal-50 border-teal-100 text-teal-900'} text-xs leading-relaxed animate-fade-in">
+                    <div class="mt-4 p-4 rounded-xl border ${state.calcResult.error ? 'bg-red-50 border-red-100 text-red-800' : 'bg-emerald-50 border-emerald-100 text-emerald-900'}">
                       ${state.calcResult.error ? `
-                        <p class="font-semibold text-red-700">${state.calcResult.error}</p>
+                        <p class="font-medium text-sm text-red-700">${state.calcResult.error}</p>
                       ` : `
                         <div>
-                          <p class="font-bold uppercase tracking-wider text-[9px] text-teal-800 mb-1">Bedside Directive</p>
-                          <div class="text-xl font-black text-slate-950 my-1">${state.calcResult.mlPerHour} mL/hr</div>
-                          <p class="text-slate-700 font-medium">${state.calcResult.summary}</p>
+                          <p class="font-bold text-xs text-emerald-800 mb-1 uppercase tracking-wide">Flow Rate</p>
+                          <div class="text-2xl font-black text-slate-900 my-1">${state.calcResult.mlPerHour} <span class="text-lg font-bold text-slate-600">mL/hr</span></div>
+                          <p class="text-sm text-slate-700 font-medium mt-2">${state.calcResult.summary}</p>
                         </div>
                       `}
                     </div>
                   ` : ''}
                 </div>
               ` : `
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4 animate-fade-in">
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                   <div>
-                    <h3 class="text-xs font-bold text-slate-950 uppercase tracking-widest">Clinical Reference Inquiry</h3>
-                    <p class="text-[10px] text-slate-400 mt-1">Submit high-alert, medication-focused scenarios to review safety parameters.</p>
+                    <h3 class="text-sm font-bold text-slate-800">Clinical Consult</h3>
+                    <p class="text-xs text-slate-500 mt-1 font-medium">Ask specific clinical questions regarding administration and safety parameters.</p>
                   </div>
 
-                  <textarea
-                    id="assistant-prompt-input"
-                    placeholder="e.g. What is the standard concentration and monitoring protocol for central line administration of Potassium Chloride infusions?"
-                    class="w-full min-h-[120px] bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-950 focus:outline-none focus:ring-1 focus:ring-teal-500/20 placeholder-slate-400 leading-relaxed resize-none"
-                  >${state.assistantPrompt}</textarea>
+                  <textarea id="assistant-prompt-input" placeholder="e.g., What is the standard concentration for central line administration of Potassium Chloride?"
+                    class="w-full min-h-[140px] bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none leading-relaxed">${state.assistantPrompt}</textarea>
 
-                  <button onclick="window.runAssistantQuery()" ${state.assistantLoading ? 'disabled' : ''} class="btn-feedback w-full bg-slate-950 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg text-xs transition-all uppercase tracking-widest">
-                    ${state.assistantLoading ? 'Processing Query...' : 'Execute Inquiry Analysis'}
+                  <button onclick="window.runAssistantQuery()" ${state.assistantLoading ? 'disabled' : ''} class="btn-press w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-blue-600/20">
+                    ${state.assistantLoading ? 'Analyzing guidelines...' : 'Submit Question'}
                   </button>
 
                   ${state.assistantResponse ? `
-                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-xs leading-relaxed text-slate-800 whitespace-pre-wrap shadow-inner overflow-y-auto max-h-[220px] relative animate-fade-in">
-                      <div class="sticky top-0 right-0 bg-slate-50/95 py-1 text-[8px] font-bold text-teal-700 tracking-wider uppercase border-b border-slate-200 mb-2">
-                        Validated Clinical Evaluation
-                      </div>
+                    <div class="mt-4 p-5 bg-slate-50 rounded-xl border border-slate-200 text-sm leading-relaxed text-slate-700 whitespace-pre-wrap">
+                      <div class="font-bold text-blue-700 text-xs mb-3 uppercase tracking-wide border-b border-slate-200 pb-2">Analysis Result</div>
                       ${state.assistantResponse}
                     </div>
                   ` : ''}
@@ -859,7 +855,6 @@
           </div>
         `;
 
-        // Restore active form state
         if (state.calcType === 'drip') {
           const vInput = document.getElementById('calc-vol');
           const tInput = document.getElementById('calc-time');
@@ -867,7 +862,6 @@
           if (vInput) vInput.value = state.calcInput.volume;
           if (tInput) tInput.value = state.calcInput.time;
           if (dSelect) dSelect.value = state.calcInput.dropFactor;
-
           vInput?.addEventListener('input', (e) => { state.calcInput.volume = e.target.value; });
           tInput?.addEventListener('input', (e) => { state.calcInput.time = e.target.value; });
           dSelect?.addEventListener('change', (e) => { state.calcInput.dropFactor = e.target.value; });
@@ -877,13 +871,11 @@
           const wInput = document.getElementById('calc-weight');
           const cvInput = document.getElementById('calc-conc-val');
           const cpInput = document.getElementById('calc-conc-vol');
-
           if (doInput) doInput.value = state.calcInput.doseOrdered;
           if (tuSelect) tuSelect.value = state.calcInput.timeUnit;
           if (wInput) wInput.value = state.calcInput.weight;
           if (cvInput) cvInput.value = state.calcInput.concentrationVal;
           if (cpInput) cpInput.value = state.calcInput.concentrationVol;
-
           doInput?.addEventListener('input', (e) => { state.calcInput.doseOrdered = e.target.value; });
           tuSelect?.addEventListener('change', (e) => { state.calcInput.timeUnit = e.target.value; });
           wInput?.addEventListener('input', (e) => { state.calcInput.weight = e.target.value; });
@@ -895,38 +887,42 @@
         }
       }
 
-      // Tab Panel: Settings
+      // TAB: SETTINGS
       if (state.activeTab === 'settings') {
         container.innerHTML = `
           <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50 p-4 space-y-4">
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-              <h3 class="text-xs font-bold text-slate-950 uppercase tracking-widest">Device Settings</h3>
-              <div class="space-y-3">
-                <p class="text-[11px] text-slate-500 leading-normal">Clear current device passcode parameters to configure a new PIN sequence.</p>
-                <button onclick="window.clearPasscode()" class="w-full bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 font-bold py-2.5 px-4 rounded-lg text-xs active:scale-95 transition-all mb-2.5">
-                  Clear PIN Lock Configuration
+            <h1 class="text-xl font-bold text-slate-900 mt-4 mb-2 pl-2">Settings</h1>
+            
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+              <h3 class="text-sm font-bold text-slate-800">Access Control</h3>
+              <p class="text-xs text-slate-500 font-medium leading-relaxed">Modify your local device PIN or log out of your clinical session.</p>
+              
+              <div class="space-y-3 pt-2">
+                <button onclick="window.clearPasscode()" class="btn-press w-full bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 font-semibold py-3 px-4 rounded-xl text-sm transition-all text-left flex justify-between items-center">
+                  <span>Reset Device PIN</span>
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                 </button>
-                <button onclick="window.signoutUser()" class="w-full bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 font-bold py-2.5 px-4 rounded-lg text-xs active:scale-95 transition-all flex items-center justify-center space-x-2">
+                <button onclick="window.signoutUser()" class="btn-press w-full bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 font-semibold py-3 px-4 rounded-xl text-sm transition-all text-left flex justify-between items-center">
+                  <span>Secure Logout</span>
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                  <span>Sign Out</span>
                 </button>
               </div>
             </div>
 
-            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
-              <h3 class="text-xs font-bold text-slate-950 uppercase tracking-widest">Institutional Specs</h3>
-              <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2 text-[10px] font-medium">
-                <div class="flex justify-between">
-                  <span>Server Connection:</span>
-                  <span class="text-teal-600 font-bold">Encrypted Link Active</span>
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+              <h3 class="text-sm font-bold text-slate-800">System Information</h3>
+              <div class="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-3 text-xs font-medium">
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-500">Database Connection</span>
+                  <span class="text-emerald-600 font-bold bg-emerald-100 px-2 py-0.5 rounded-md">Active</span>
                 </div>
-                <div class="flex justify-between">
-                  <span>Cloud Gateway:</span>
-                  <span>${firebaseActive ? 'Cloud-Synced Firestore' : 'Secured Browser Vault'}</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-500">Cloud Sync</span>
+                  <span class="text-slate-800">${firebaseActive ? 'Firestore Online' : 'Local Sandbox'}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span>Operator Node:</span>
-                  <span class="text-slate-500 font-semibold truncate max-w-[150px]">${appId}</span>
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-500">AI Model</span>
+                  <span class="text-slate-800">Llama 3.3 (70B)</span>
                 </div>
               </div>
             </div>
@@ -935,139 +931,146 @@
       }
     }
 
-    // Dynamic Monograph Drawer Detail Rendering
+    // Dynamic Monograph Detail Drawer
     function renderDrugDetail(drug, parentContainer) {
       if (!window.drugTabState) {
         window.drugTabState = 'summary'; 
       }
 
       parentContainer.innerHTML = `
-        <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50">
+        <div class="flex-grow flex flex-col h-full overflow-hidden bg-slate-50 relative">
           
-          <div class="p-5 bg-slate-950 text-white flex justify-between items-start flex-shrink-0 border-b border-slate-900">
-            <div>
-              <div class="flex items-center space-x-2">
-                <h2 class="text-sm font-bold capitalize tracking-wide text-slate-100">${drug.genericName}</h2>
-                ${drug.highAlert ? `
-                  <span class="text-[7px] bg-red-950/40 text-red-400 border border-red-900/60 px-2 py-0.5 rounded font-black tracking-widest uppercase">
-                    High Alert
-                  </span>
-                ` : ''}
-              </div>
-              <p class="text-[10px] text-slate-400 mt-1 tracking-wide font-medium">${drug.brandNames.join(', ')}</p>
-              <span class="inline-block bg-slate-900 text-teal-400 text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded mt-2 border border-slate-800">
-                ${drug.therapeuticClass}
-              </span>
-            </div>
-            <button onclick="window.closeDrugDetail()" class="text-slate-400 hover:text-white bg-slate-900 px-3 py-1.5 rounded-lg text-[10px] uppercase font-bold tracking-wider transition-colors border border-slate-800">
-              Close
+          <!-- Header -->
+          <div class="bg-white px-5 pt-6 pb-4 border-b border-slate-200 shadow-sm z-10 flex-shrink-0">
+            <button onclick="window.closeDrugDetail()" class="flex items-center space-x-1 text-blue-600 font-semibold text-xs mb-4 hover:opacity-80 active-feedback w-fit px-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+              <span>Back to List</span>
             </button>
+            <div class="flex items-start justify-between">
+              <div>
+                <h2 class="text-2xl font-bold text-slate-900 capitalize tracking-tight leading-none">${drug.genericName}</h2>
+                <p class="text-xs text-slate-500 mt-1.5 font-medium">${drug.brandNames.join(', ')}</p>
+                <div class="flex items-center space-x-2 mt-3">
+                  <span class="inline-block bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg">
+                    ${drug.therapeuticClass}
+                  </span>
+                  ${drug.highAlert ? `
+                    <span class="inline-block bg-red-100 text-red-700 border border-red-200 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-lg">
+                      High Alert
+                    </span>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="flex-shrink-0 flex bg-slate-100 border-b border-slate-200 p-1 overflow-x-auto whitespace-nowrap scrollbar-none">
-            ${[
-              { id: 'summary', label: 'Summary' },
-              { id: 'admin', label: 'Admin & IV' },
-              { id: 'info', label: 'Kinetics' },
-              { id: 'monitoring', label: 'Monitoring' },
-              { id: 'interactions', label: 'Contraindications' },
-              { id: 'research', label: 'Clinical Evidence' }
-            ].map(tab => `
-              <button onclick="window.setDrugDetailTab('${tab.id}')" class="px-4 py-2 text-[9px] uppercase font-bold tracking-wider rounded-lg transition-all ${
-                window.drugTabState === tab.id ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500 hover:text-slate-950'
-              }">
-                ${tab.label}
-              </button>
-            `).join('')}
+          <!-- Horizontal Scrollable Tabs -->
+          <div class="flex-shrink-0 bg-white border-b border-slate-200 px-3 py-2 overflow-x-auto whitespace-nowrap scrollbar-none shadow-sm z-0">
+            <div class="flex space-x-1.5">
+              ${[
+                { id: 'summary', label: 'Summary' },
+                { id: 'admin', label: 'Admin & IV' },
+                { id: 'info', label: 'Kinetics' },
+                { id: 'monitoring', label: 'Monitoring' },
+                { id: 'interactions', label: 'Contraindications' },
+                { id: 'research', label: 'References' }
+              ].map(tab => `
+                <button onclick="window.setDrugDetailTab('${tab.id}')" class="px-4 py-2 text-xs font-bold rounded-full transition-all ${
+                  window.drugTabState === tab.id ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }">
+                  ${tab.label}
+                </button>
+              `).join('')}
+            </div>
           </div>
 
-          <div class="flex-grow app-scroll-container p-4 pb-6 space-y-4">
+          <!-- Content Scroll Area -->
+          <div class="flex-grow app-scroll-container p-5 space-y-5 pb-8">
             
             ${drug.blackBoxWarning && drug.blackBoxWarning.toLowerCase() !== 'none' ? `
-              <div class="bg-red-50 border border-red-200 p-3.5 rounded-xl flex items-start space-x-2.5">
-                <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+              <div class="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-start space-x-3">
+                <div class="bg-red-100 p-1.5 rounded-lg flex-shrink-0 mt-0.5">
+                  <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
                 <div>
-                  <h4 class="text-[8px] font-bold uppercase tracking-wider text-red-800">Boxed FDA Safety Advisory</h4>
-                  <p class="text-xs text-red-950 mt-0.5 font-medium leading-relaxed">${drug.blackBoxWarning}</p>
+                  <h4 class="text-xs font-bold text-red-800 uppercase tracking-wide">Black Box Warning</h4>
+                  <p class="text-sm text-red-900 mt-1 font-medium leading-relaxed">${drug.blackBoxWarning}</p>
                 </div>
               </div>
             ` : ''}
 
             ${window.drugTabState === 'summary' ? `
-              <div class="space-y-4 animate-fade-in">
-                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
-                  <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest block">Administration Speed Reference</span>
-                  <div class="grid grid-cols-2 gap-2">
-                    <div class="p-2.5 bg-white rounded border border-slate-200/50">
-                      <span class="text-[7px] uppercase font-bold text-slate-400 block">Infusion Rate</span>
-                      <span class="text-[11px] font-semibold text-slate-800 leading-relaxed block mt-0.5">${drug.administration.infusionRate}</span>
-                    </div>
-                    <div class="p-2.5 bg-white rounded border border-slate-200/50">
-                      <span class="text-[7px] uppercase font-bold text-slate-400 block">Molecular Classification</span>
-                      <span class="text-[11px] font-semibold text-slate-800 leading-relaxed block mt-0.5">${drug.therapeuticClass}</span>
-                    </div>
-                  </div>
+              <div class="space-y-5 animate-fade-in">
+                <div class="grid grid-cols-2 gap-3">
+                   <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Standard Rate</span>
+                     <span class="text-sm font-semibold text-slate-800 leading-snug block">${drug.administration.infusionRate}</span>
+                   </div>
+                   <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Primary Route</span>
+                     <span class="text-sm font-semibold text-slate-800 leading-snug block">${drug.administration.routes[0] || 'Check full profile'}</span>
+                   </div>
                 </div>
 
-                <div class="border-t border-slate-200 pt-3">
-                  <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Target Monitoring Parameters</span>
-                  <div class="space-y-2 bg-teal-50/20 p-3.5 rounded-xl border border-teal-100/50">
-                    <div class="text-[11px] text-slate-800 font-semibold flex items-start space-x-1.5">
-                      <span class="text-teal-600 mt-1 flex-shrink-0">•</span>
-                      <span><strong>Vitals Assessment:</strong> ${drug.monitoring.vitalSigns[0] || 'Standard baseline checks.'}</span>
-                    </div>
-                    <div class="text-[11px] text-slate-800 font-semibold flex items-start space-x-1.5">
-                      <span class="text-teal-600 mt-1 flex-shrink-0">•</span>
-                      <span><strong>Chemical Pathology Assay:</strong> ${drug.monitoring.labValues[0] || 'Standard metabolic panels.'}</span>
-                    </div>
-                  </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 border-b border-slate-100 pb-2">Key Monitoring</h3>
+                  <ul class="space-y-3">
+                    <li class="text-sm text-slate-700 font-medium flex items-start space-x-2">
+                      <span class="text-blue-500 mt-1">•</span>
+                      <span><strong class="text-slate-900">Vitals:</strong> ${drug.monitoring.vitalSigns[0] || 'Standard monitoring.'}</span>
+                    </li>
+                    <li class="text-sm text-slate-700 font-medium flex items-start space-x-2">
+                      <span class="text-blue-500 mt-1">•</span>
+                      <span><strong class="text-slate-900">Labs:</strong> ${drug.monitoring.labValues[0] || 'Standard panel.'}</span>
+                    </li>
+                  </ul>
                 </div>
 
-                <div class="border-t border-slate-200 pt-3">
-                  <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Immediate Delivery Actions</span>
-                  <div class="bg-slate-950 text-teal-400 p-3.5 rounded-lg text-xs space-y-1.5 font-mono shadow-inner border border-slate-800">
-                    <div class="flex items-start space-x-2">
-                      <span class="text-teal-500">•</span>
-                      <span>${drug.administration.criticalActions[0] || 'Perform secondary independent verification.'}</span>
-                    </div>
+                <div class="bg-slate-800 p-5 rounded-2xl shadow-sm text-white">
+                  <h3 class="text-xs font-bold text-blue-300 uppercase tracking-wide mb-3 border-b border-slate-700 pb-2">Immediate Safety Actions</h3>
+                  <ul class="space-y-2.5">
+                    <li class="text-sm font-medium leading-relaxed flex items-start space-x-2">
+                      <svg class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      <span>${drug.administration.criticalActions[0] || 'Double-check calculations.'}</span>
+                    </li>
                     ${drug.administration.criticalActions[1] ? `
-                      <div class="flex items-start space-x-2 pt-1.5 border-t border-slate-900">
-                        <span class="text-teal-500">•</span>
+                      <li class="text-sm font-medium leading-relaxed flex items-start space-x-2">
+                        <svg class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                         <span>${drug.administration.criticalActions[1]}</span>
-                      </div>
+                      </li>
                     ` : ''}
-                  </div>
+                  </ul>
                 </div>
               </div>
             ` : ''}
 
             ${window.drugTabState === 'admin' ? `
-              <div class="space-y-3.5 animate-fade-in">
-                <div>
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Standard Administration Routes</span>
-                  <div class="flex flex-wrap gap-1.5">
+              <div class="space-y-5 animate-fade-in">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Approved Routes</h3>
+                  <div class="flex flex-wrap gap-2">
                     ${drug.administration.routes.map(route => `
-                      <span class="bg-white text-slate-800 text-[10px] font-bold px-2.5 py-1 rounded border border-slate-200">${route}</span>
+                      <span class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-100">${route}</span>
                     `).join('')}
                   </div>
                 </div>
 
-                <div class="border-t border-slate-200 pt-3">
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">IV Compatibility, Dilution, & Lines</span>
-                  <p class="text-xs text-slate-800 font-medium leading-relaxed bg-teal-50/30 p-3 rounded-lg border border-teal-100/50">${drug.administration.ivCompatibility}</p>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">IV Compatibility & Setup</h3>
+                  <p class="text-sm text-slate-800 font-medium leading-relaxed">${drug.administration.ivCompatibility}</p>
                 </div>
 
-                <div class="border-t border-slate-200 pt-3">
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Infusion Duration / Rate Restrictions</span>
-                  <p class="text-xs text-slate-800 font-medium leading-relaxed">${drug.administration.infusionRate}</p>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Infusion Rate Parameters</h3>
+                  <p class="text-sm text-slate-800 font-medium leading-relaxed">${drug.administration.infusionRate}</p>
                 </div>
 
-                <div class="border-t border-slate-200 pt-3">
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Mandatory Preparation Directives</span>
-                  <ul class="space-y-2">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 border-b border-slate-100 pb-2">Preparation Directives</h3>
+                  <ul class="space-y-3">
                     ${drug.administration.criticalActions.map(action => `
-                      <li class="text-xs text-slate-800 leading-relaxed flex items-start space-x-2">
-                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full mt-2 flex-shrink-0"></span>
+                      <li class="text-sm text-slate-700 font-medium leading-relaxed flex items-start space-x-2">
+                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
                         <span>${action}</span>
                       </li>
                     `).join('')}
@@ -1077,58 +1080,58 @@
             ` : ''}
 
             ${window.drugTabState === 'info' ? `
-              <div class="space-y-3.5 animate-fade-in">
-                <div>
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Approved Therapeutic Indications</span>
-                  <ul class="space-y-2">
+              <div class="space-y-5 animate-fade-in">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 border-b border-slate-100 pb-2">Therapeutic Indications</h3>
+                  <ul class="space-y-3">
                     ${drug.indications.map(ind => `
-                      <li class="text-xs text-slate-800 leading-relaxed flex items-start space-x-2">
-                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full mt-2 flex-shrink-0"></span>
+                      <li class="text-sm text-slate-700 font-medium leading-relaxed flex items-start space-x-2">
+                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
                         <span>${ind}</span>
                       </li>
                     `).join('')}
                   </ul>
                 </div>
 
-                <div class="border-t border-slate-200 pt-3">
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Pharmacological Mechanism of Action</span>
-                  <p class="text-xs text-slate-800 font-medium leading-relaxed">${drug.mechanismOfAction}</p>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Mechanism of Action</h3>
+                  <p class="text-sm text-slate-800 font-medium leading-relaxed">${drug.mechanismOfAction}</p>
                 </div>
               </div>
             ` : ''}
 
             ${window.drugTabState === 'monitoring' ? `
-              <div class="space-y-3.5 animate-fade-in">
-                <div>
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Hemodynamic Assessment Parameters</span>
-                  <ul class="space-y-2">
+              <div class="space-y-5 animate-fade-in">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 border-b border-slate-100 pb-2">Hemodynamic Assessment</h3>
+                  <ul class="space-y-3">
                     ${drug.monitoring.vitalSigns.map(item => `
-                      <li class="text-xs text-slate-800 leading-relaxed flex items-start space-x-2">
-                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full mt-2 flex-shrink-0"></span>
+                      <li class="text-sm text-slate-700 font-medium leading-relaxed flex items-start space-x-2">
+                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
                         <span>${item}</span>
                       </li>
                     `).join('')}
                   </ul>
                 </div>
 
-                <div class="border-t border-slate-200 pt-3">
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Clinical Pathology Assays</span>
-                  <ul class="space-y-2">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 border-b border-slate-100 pb-2">Required Labs</h3>
+                  <ul class="space-y-3">
                     ${drug.monitoring.labValues.map(item => `
-                      <li class="text-xs text-slate-800 leading-relaxed flex items-start space-x-2">
-                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full mt-2 flex-shrink-0"></span>
+                      <li class="text-sm text-slate-700 font-medium leading-relaxed flex items-start space-x-2">
+                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
                         <span>${item}</span>
                       </li>
                     `).join('')}
                   </ul>
                 </div>
 
-                <div class="border-t border-slate-200 pt-3">
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Systemic Toxicities / Adverse Signs</span>
-                  <ul class="space-y-2">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 border-b border-slate-100 pb-2">Adverse Clinical Signs</h3>
+                  <ul class="space-y-3">
                     ${drug.monitoring.clinicalSigns.map(item => `
-                      <li class="text-xs text-slate-800 leading-relaxed flex items-start space-x-2">
-                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full mt-2 flex-shrink-0"></span>
+                      <li class="text-sm text-slate-700 font-medium leading-relaxed flex items-start space-x-2">
+                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
                         <span>${item}</span>
                       </li>
                     `).join('')}
@@ -1138,12 +1141,12 @@
             ` : ''}
 
             ${window.drugTabState === 'interactions' ? `
-              <div class="space-y-3.5 animate-fade-in">
-                <div>
-                  <span class="text-[9px] font-bold text-red-600 uppercase tracking-wider block mb-1.5">Therapeutic Incompatibilities</span>
-                  <ul class="space-y-2">
+              <div class="space-y-5 animate-fade-in">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-red-500 uppercase tracking-wide mb-3 border-b border-slate-100 pb-2">Drug Interactions</h3>
+                  <ul class="space-y-3">
                     ${drug.interactions.map(item => `
-                      <li class="text-xs text-slate-800 leading-relaxed flex items-start space-x-2">
+                      <li class="text-sm text-slate-700 font-medium leading-relaxed flex items-start space-x-2">
                         <span class="text-red-500 font-bold">•</span>
                         <span>${item}</span>
                       </li>
@@ -1151,11 +1154,11 @@
                   </ul>
                 </div>
 
-                <div class="border-t border-slate-200 pt-3">
-                  <span class="text-[9px] font-bold text-red-600 uppercase tracking-wider block mb-1.5">Absolute & Relative Contraindications</span>
-                  <ul class="space-y-2">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-red-500 uppercase tracking-wide mb-3 border-b border-slate-100 pb-2">Contraindications</h3>
+                  <ul class="space-y-3">
                     ${drug.contraindications.map(item => `
-                      <li class="text-xs text-slate-800 leading-relaxed flex items-start space-x-2">
+                      <li class="text-sm text-slate-700 font-medium leading-relaxed flex items-start space-x-2">
                         <span class="text-red-500 font-bold">•</span>
                         <span>${item}</span>
                       </li>
@@ -1166,45 +1169,23 @@
             ` : ''}
 
             ${window.drugTabState === 'research' ? `
-              <div class="space-y-3.5 animate-fade-in">
-                <div>
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Consensus literature Guidelines</span>
-                  <p class="text-xs text-slate-800 leading-relaxed font-medium bg-slate-100 p-3 rounded-lg border border-slate-250">${drug.recentResearch}</p>
+              <div class="space-y-5 animate-fade-in">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Literature Consensus</h3>
+                  <p class="text-sm text-slate-800 font-medium leading-relaxed">${drug.recentResearch}</p>
                 </div>
 
-                <div class="border-t border-slate-200 pt-3">
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Primary Patient Safety Criteria</span>
-                  <ul class="space-y-2">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 border-b border-slate-100 pb-2">Patient Education</h3>
+                  <ul class="space-y-3">
                     ${drug.patientEducation.map(item => `
-                      <li class="text-xs text-slate-800 leading-relaxed flex items-start space-x-2">
-                        <span class="w-1.5 h-1.5 bg-slate-400 rounded-full mt-2 flex-shrink-0"></span>
+                      <li class="text-sm text-slate-700 font-medium leading-relaxed flex items-start space-x-2">
+                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
                         <span>${item}</span>
                       </li>
                     `).join('')}
                   </ul>
                 </div>
-
-                ${drug.references && drug.references.length > 0 ? `
-                  <div class="border-t border-slate-200 pt-3">
-                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Source Attributions</span>
-                    <div class="space-y-1.5">
-                      ${drug.references.map(ref => `
-                        <div class="text-[10px] text-teal-600 font-semibold truncate">
-                          ${ref.uri ? `
-                            <a href="${ref.uri}" target="_blank" rel="noopener noreferrer" class="underline hover:text-teal-850 flex items-center space-x-1.5">
-                              <svg class="w-3.5 h-3.5 flex-shrink-0 text-teal-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 002.502-2.502m1.07-1.912a4 4 0 015.656 0l4 4a4 4 0 01-5.656 5.656l-1.1 1.1" /></svg>
-                              <span>${ref.title}</span>
-                            </a>
-                          ` : `
-                            <div class="flex items-center space-x-1.5 text-slate-500 font-normal">
-                              <span>${ref.title}</span>
-                            </div>
-                          `}
-                        </div>
-                      `).join('')}
-                    </div>
-                  </div>
-                ` : ''}
               </div>
             ` : ''}
 
@@ -1213,7 +1194,6 @@
       `;
     }
 
-    // Module-Level Global Switch Tabs
     window.switchTab = (tabId) => {
       state.activeTab = tabId;
       state.selectedDrug = null;
@@ -1245,7 +1225,6 @@
       renderApp();
     };
 
-    // Calculate dosage/rates math
     window.runCalculation = () => {
       if (state.calcType === 'drip') {
         const vol = parseFloat(document.getElementById('calc-vol')?.value);
@@ -1253,24 +1232,14 @@
         const df = parseFloat(document.getElementById('calc-drop')?.value);
 
         if (isNaN(vol) || isNaN(hrs) || isNaN(df) || vol <= 0 || hrs <= 0) {
-          state.calcResult = { error: "Parameters must be positive integers." };
-          renderApp();
-          return;
+          state.calcResult = { error: "Please enter valid numbers." };
+          renderApp(); return;
         }
-
-        // Store active inputs
-        state.calcInput.volume = vol;
-        state.calcInput.time = hrs;
-        state.calcInput.dropFactor = df;
+        state.calcInput.volume = vol; state.calcInput.time = hrs; state.calcInput.dropFactor = df;
 
         const mlPerHour = Math.round((vol / hrs) * 10) / 10;
         const gttsPerMin = Math.round((vol * df) / (hrs * 60));
-        state.calcResult = {
-          type: 'drip',
-          mlPerHour,
-          gttsPerMin,
-          summary: `Administer continuous infusion at ${mlPerHour} mL/hr (equivalent to ${gttsPerMin} drops/minute at a set factor of ${df} drops/mL).`
-        };
+        state.calcResult = { type: 'drip', mlPerHour, summary: `Infuse at ${mlPerHour} mL/hr (approx. ${gttsPerMin} gtts/min at ${df} drops/mL).` };
       } else {
         const dose = parseFloat(document.getElementById('calc-dose')?.value);
         const unit = document.getElementById('calc-unit')?.value;
@@ -1279,51 +1248,30 @@
         const concVol = parseFloat(document.getElementById('calc-conc-vol')?.value);
 
         if (isNaN(dose) || isNaN(concV) || isNaN(concVol) || dose <= 0 || concV <= 0 || concVol <= 0) {
-          state.calcResult = { error: "Mass and Concentration values must be positive integers." };
-          renderApp();
-          return;
+          state.calcResult = { error: "Mass and concentration required." };
+          renderApp(); return;
         }
-
-        // Store active inputs
-        state.calcInput.doseOrdered = dose;
-        state.calcInput.timeUnit = unit;
-        state.calcInput.weight = wt;
-        state.calcInput.concentrationVal = concV;
-        state.calcInput.concentrationVol = concVol;
+        state.calcInput.doseOrdered = dose; state.calcInput.timeUnit = unit; state.calcInput.weight = wt;
+        state.calcInput.concentrationVal = concV; state.calcInput.concentrationVol = concVol;
 
         let hourlyDose = dose;
-        if (unit === 'min') {
-          hourlyDose = dose * 60;
-        }
-
-        if (wt && wt > 0) {
-          hourlyDose = hourlyDose * wt;
-        }
+        if (unit === 'min') hourlyDose = dose * 60;
+        if (wt && wt > 0) hourlyDose = hourlyDose * wt;
 
         const mlPerHour = Math.round(((hourlyDose / concV) * concVol) * 100) / 100;
-        
-        state.calcResult = {
-          type: 'dose',
-          mlPerHour,
-          summary: `Deliver continuous infusion at ${mlPerHour} mL/hr to target a prescribed dosage of ${dose} ${wt ? 'mcg/kg/min' : 'mg/hr'}.`
-        };
+        state.calcResult = { type: 'dose', mlPerHour, summary: `Deliver at ${mlPerHour} mL/hr to meet target dose of ${dose} ${wt ? 'mcg/kg/min' : 'mg/hr'}.` };
       }
       renderApp();
     };
 
-    window.runAssistantQuery = () => {
-      handleAssistantQuery();
-    };
+    window.runAssistantQuery = () => { handleAssistantQuery(); };
 
-    // Device lock passcode logic
     window.pressPIN = (key) => {
       state.passcodeError = '';
       if (key === 'delete') {
         state.passcodeInput = state.passcodeInput.slice(0, -1);
-        renderApp();
-        return;
+        renderApp(); return;
       }
-
       if (state.passcodeInput.length >= 4) return;
       state.passcodeInput += key;
       renderApp();
@@ -1333,7 +1281,7 @@
           state.tempPasscode = state.passcodeInput;
           state.setupStep = 'setup-2';
           state.passcodeInput = '';
-          showBanner("Confirm passcode pattern", "info");
+          showBanner("Confirm your new PIN", "success");
         } else if (state.setupStep === 'setup-2') {
           if (state.passcodeInput === state.tempPasscode) {
             localStorage.setItem('rn_passcode', state.passcodeInput);
@@ -1341,9 +1289,8 @@
             state.setupStep = 'enter';
             state.isLocked = false;
             state.passcodeInput = '';
-            showBanner("Access granted.", "success");
           } else {
-            state.passcodeError = "Verification mismatch. Restart PIN config.";
+            state.passcodeError = "PINs did not match. Try again.";
             state.setupStep = 'setup-1';
             state.passcodeInput = '';
             state.tempPasscode = '';
@@ -1352,9 +1299,8 @@
           if (state.passcodeInput === state.passcode) {
             state.isLocked = false;
             state.passcodeInput = '';
-            showBanner("Device unlocked.", "success");
           } else {
-            state.passcodeError = "Invalid entry code.";
+            state.passcodeError = "Incorrect PIN.";
             state.passcodeInput = '';
           }
         }
@@ -1365,27 +1311,19 @@
     window.signoutUser = async () => {
       try {
         await signOut(auth);
-        state.user = null;
-        state.isLocked = true;
-        state.passcodeInput = '';
+        state.user = null; state.isLocked = true; state.passcodeInput = '';
         renderApp();
-        showBanner("Signed out successfully.", "info");
-      } catch (err) {
-        console.error("Logout failed", err);
-      }
+      } catch (err) { console.error("Logout failed", err); }
     };
 
     window.clearPasscode = () => {
       localStorage.removeItem('rn_passcode');
-      state.passcode = '';
-      state.setupStep = 'setup-1';
-      state.passcodeInput = '';
-      state.isLocked = true;
+      state.passcode = ''; state.setupStep = 'setup-1'; state.passcodeInput = ''; state.isLocked = true;
       renderApp();
-      showBanner("PIN authorization pattern reset.", "info");
+      showBanner("PIN reset successfully.", "success");
     };
 
-    // Render Initial Login Frame
+    // Initial render
     renderApp();
   </script>
 </body>
