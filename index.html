@@ -728,15 +728,9 @@
               <div class="flex-grow app-scroll-container p-4 pb-6 space-y-3">
                 ${filteredDrugs.map(drug => `
                   <!-- Swipe-to-Delete Container -->
-                  <div class="relative rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-red-500 group">
-                    <!-- Background Delete Button -->
-                    <button onclick="window.deleteDrug('${drug.id}')" class="absolute inset-y-0 right-0 w-24 flex flex-col items-center justify-center text-white focus:outline-none hover:bg-red-600 transition-colors">
-                      <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      <span class="text-[10px] font-bold tracking-wider uppercase">Delete</span>
-                    </button>
-                    
-                    <!-- Swipeable Foreground Card -->
-                    <div class="overflow-x-auto snap-x snap-mandatory scrollbar-none flex w-full h-full relative" style="-webkit-overflow-scrolling: touch;">
+                  <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-white">
+                    <div class="overflow-x-auto snap-x snap-mandatory scrollbar-none flex w-full" style="-webkit-overflow-scrolling: touch;">
+                      <!-- Swipeable Foreground Card -->
                       <div class="snap-start w-full flex-shrink-0 bg-white p-4 flex justify-between items-center cursor-pointer active-feedback" onclick="window.selectDrug('${drug.id}')">
                         <div class="flex items-start space-x-3">
                           <div class="mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${drug.highAlert ? 'bg-red-500' : 'bg-blue-500'}"></div>
@@ -747,8 +741,12 @@
                         </div>
                         <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                       </div>
-                      <!-- Spacer to allow scroll-snap to reveal delete button -->
-                      <div class="snap-end w-24 flex-shrink-0 bg-transparent pointer-events-none"></div>
+                      
+                      <!-- Inline Delete Button -->
+                      <button onclick="window.deleteDrug('${drug.id}')" class="snap-start w-24 flex-shrink-0 bg-red-500 hover:bg-red-600 text-white flex flex-col items-center justify-center focus:outline-none transition-colors">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        <span class="text-[10px] font-bold tracking-wider uppercase">Delete</span>
+                      </button>
                     </div>
                   </div>
                 `).join('')}
